@@ -1,8 +1,5 @@
-
-Redirect 301 /Facebook https://www.facebook.com/TeamForestWork
-Redirect 301 /facebook https://www.facebook.com/TeamForestWork
-Redirect 301 /Youtube https://www.youtube.com/channel/UCpxH-OxcJujRLpnDUgoYlsg
-Redirect 301 /youtube https://www.youtube.com/channel/UCpxH-OxcJujRLpnDUgoYlsg
+Redirect 301 /Youtube https://www.youtube.com/@forestwork
+Redirect 301 /youtube https://www.youtube.com/@forestwork
 Redirect 301 /Twitter https://twitter.com/teamforestwork
 Redirect 301 /twitter https://twitter.com/teamforestwork
 
