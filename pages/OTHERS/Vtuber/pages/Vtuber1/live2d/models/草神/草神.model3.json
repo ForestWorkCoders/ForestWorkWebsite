@@ -1,0 +1,40 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "草神.moc3",
+		"Textures": [
+			"草神.8192/texture_00.png"
+		],
+		"Physics": "草神.physics3.json",
+		"DisplayInfo": "草神.cdi3.json",
+		"Motions":{
+			"Idle":[
+				{"File":"待机动画.motion3.json"}
+			],
+			"TapBody":[
+				{"File":"1.motion3.json"}
+			],
+			"TapHead":[
+				{"File":"待机动画.motion3.json"}
+			]
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY"
+			]
+		}
+	],
+	"HitAreas": []
+}
