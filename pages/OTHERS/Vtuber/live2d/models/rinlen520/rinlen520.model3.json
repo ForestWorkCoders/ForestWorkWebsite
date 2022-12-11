@@ -1,0 +1,31 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "rinlen520.moc3",
+		"Textures": [
+			"rinlen520.8192/texture_00.png"
+		],
+		"Physics": "rinlen520.physics3.json",
+		"DisplayInfo": "rinlen520.cdi3.json",
+		"Motions":{
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen",
+				"ParamBreath"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY"
+			]
+		}
+	]
+}
