@@ -24,3 +24,4 @@ function(err, data) {
     document.getElementById("counter2").appendChild(counter);
   }
 });
+
