@@ -45,9 +45,20 @@
       <div class="container">
 
         <div class="row gy-4">
+
           <div class="col-lg-8">
             <div class="waifu">
-              <canvas id="live2d" class="live2d"></canvas>
+              <canvas id="live2d" width="960" height="1080" class="live2d"></canvas>
+              <!--
+              <div class="waifu-tips"></div>
+              <div class="waifu-tool">
+                <span class="fui-home"></span>
+                <span class="fui-chat"></span>
+                <span class="fui-eye"></span>
+                <span class="fui-user"></span>
+                <span class="fui-info-circle"></span>
+              </div>
+            -->
             </div>
           </div>
 
@@ -82,7 +93,7 @@
               <h3>最喜歡……</h3>
               <ul>
                 <li><strong>顏色</strong>: 紫色</li>
-                <li><strong>食物&amp;飲料</strong>: 芋頭相關的食物</li>
+                <li><strong>食物&飲料</strong>: 芋頭相關的食物</li>
                 <li><strong>遊戲</strong>: Rainbow Six Siege</li>
                 <li><strong>動畫</strong>: 幼女戰記</li>
                 <li><strong>漫畫</strong>: 守護甜心</li>
@@ -100,7 +111,7 @@
                 <li><strong>Twitch</strong>: <a href="https://t.co/Tw0gkgOV5i" target="_blank">V_HanasakiAyame</a></li>
                 <li><strong>Twitter</strong>: <a href="https://twitter.com/V_HanasakiAyame" target="_blank">@V_HanasakiAyame</a></li>
                 <li><strong>Discord Server</strong>: <a href="https://t.co/fkBBKlKMYg" target="_blank">鳶尾花平原</a>
-                </li><li><strong>棉花糖</strong>: <a href="https://t.co/axFV8YK4Mq" target="_blank">https://t.co/axFV8YK4Mq</a></li>
+                <li><strong>棉花糖</strong>: <a href="https://t.co/axFV8YK4Mq" target="_blank">https://t.co/axFV8YK4Mq</a></li>
               </ul>
             </div>
             <div class="portfolio-description">
@@ -114,11 +125,6 @@
           </div>
 
         </div>
-  <script>
-  	$("#live2d").outerHeight($(window).height()-$("#live2d").offset().top- Math.abs($("#live2d").outerHeight(true) - $("#live2d").outerHeight()));
-    $(window).on("resize", function(){         				$("#live2d").outerHeight($(window).height()-$("#live2d").offset().top- Math.abs($("#live2d").outerHeight(true) - $("#live2d").outerHeight()));
-    });
-  </script>
 
       </div>
     </section><!-- End Portfolio Details Section -->
