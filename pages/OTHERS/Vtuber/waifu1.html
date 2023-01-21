@@ -46,21 +46,7 @@
     <script src='https://forestwork.team/pages/OTHERS/Vtuber/js/main.js'></script>
 </head>
 <body>
-    <!-- Canvas -->
-    <div class="Canvas" id="L2dCanvas"></div>
-    <script>
-        var config = {
-            width: window.innerWidth / 2,
-            height: window.innerHeight,
-            left: '0px',
-            bottom: '0px',
-            basePath: '/assets',
-            role: 'rinlen520',
-            opacity: 1,
-            mobile: false
-        }
-        var v = new Viewer(config);  
-    </script>
+    
 
     <!-- ======= Portfolio Details Section ======= -->
     <section id="portfolio-details" class="portfolio-details">
@@ -68,6 +54,21 @@
   
             <div class="row gy-4">
                 <div class="col-lg-8">
+                  <!-- Canvas -->
+                  <div class="Canvas" id="L2dCanvas"></div>
+                  <script>
+                      var config = {
+                          width: window.innerWidth / 2,
+                          height: window.innerHeight,
+                          left: '0px',
+                          bottom: '0px',
+                          basePath: 'https://forestwork.team/pages/OTHERS/Vtuber/models',
+                          role: 'rinlen520',
+                          opacity: 1,
+                          mobile: false
+                      }
+                      var v = new Viewer(config);  
+                  </script>
                 </div>
             </div>
 
