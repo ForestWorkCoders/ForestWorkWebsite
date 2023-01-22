@@ -1,10 +1,10 @@
 {
     "Version": 1,
-    "Name": "冥雪",
+    "Name": "全身立繪_許冥雪(拆解檔)0",
     "ModelID": "546d6682d07a4157a656c0f95192bcbc",
     "FileReferences": {
         "Icon": "",
-        "Model": "冥雪.model3.json",
+        "Model": "全身立繪_許冥雪(拆解檔)0.model3.json",
         "IdleAnimation": "",
         "IdleAnimationWhenTrackingLost": ""
     },
