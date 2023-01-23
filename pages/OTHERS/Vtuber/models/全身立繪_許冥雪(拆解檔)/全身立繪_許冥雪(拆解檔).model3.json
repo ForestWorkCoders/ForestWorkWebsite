@@ -12,11 +12,7 @@
 		{
 			"Target": "Parameter",
 			"Name": "EyeBlink",
-			"Ids": [
-				"PARAM_EYE_L_OPEN",
-				"PARAM_EYE_R_OPEN",
-				"Param_Breath"
-			]
+			"Ids": []
 		}
 	]
 }
