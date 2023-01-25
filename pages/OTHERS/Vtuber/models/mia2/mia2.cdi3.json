@@ -1,0 +1,269 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "Param",
+			"GroupId": "",
+			"Name": "sweat"
+		},
+		{
+			"Id": "Param8",
+			"GroupId": "",
+			"Name": "redface"
+		},
+		{
+			"Id": "jacket",
+			"GroupId": "",
+			"Name": "jacket"
+		},
+		{
+			"Id": "Param5",
+			"GroupId": "",
+			"Name": "jackethand2"
+		},
+		{
+			"Id": "Param14",
+			"GroupId": "",
+			"Name": "jacketbasic"
+		},
+		{
+			"Id": "Param11",
+			"GroupId": "",
+			"Name": "jacketpt2"
+		},
+		{
+			"Id": "Param6",
+			"GroupId": "",
+			"Name": "jackethand1"
+		},
+		{
+			"Id": "Param2",
+			"GroupId": "",
+			"Name": "hat"
+		},
+		{
+			"Id": "sword",
+			"GroupId": "",
+			"Name": "sword"
+		},
+		{
+			"Id": "otherhand",
+			"GroupId": "",
+			"Name": "otherhand"
+		},
+		{
+			"Id": "Param3",
+			"GroupId": "",
+			"Name": "pig"
+		},
+		{
+			"Id": "Param4",
+			"GroupId": "",
+			"Name": "blackface"
+		},
+		{
+			"Id": "PARAM_ANGLE_X",
+			"GroupId": "",
+			"Name": "角度 X"
+		},
+		{
+			"Id": "PARAM_ANGLE_Y",
+			"GroupId": "",
+			"Name": "角度 Y"
+		},
+		{
+			"Id": "PARAM_ANGLE_Z",
+			"GroupId": "",
+			"Name": "角度 Z"
+		},
+		{
+			"Id": "PARAM_EYE_L_OPEN",
+			"GroupId": "",
+			"Name": "左眼　開閉"
+		},
+		{
+			"Id": "PARAM_EYE_L_SMILE",
+			"GroupId": "",
+			"Name": "左眼　笑顔"
+		},
+		{
+			"Id": "PARAM_EYE_R_OPEN",
+			"GroupId": "",
+			"Name": "右眼　開閉"
+		},
+		{
+			"Id": "PARAM_EYE_R_SMILE",
+			"GroupId": "",
+			"Name": "右眼　笑顔"
+		},
+		{
+			"Id": "PARAM_EYE_BALL_X",
+			"GroupId": "",
+			"Name": "目玉 X"
+		},
+		{
+			"Id": "PARAM_EYE_BALL_Y",
+			"GroupId": "",
+			"Name": "目玉 Y"
+		},
+		{
+			"Id": "PARAM_BROW_L_Y",
+			"GroupId": "",
+			"Name": "左眉　上下"
+		},
+		{
+			"Id": "PARAM_BROW_R_Y",
+			"GroupId": "",
+			"Name": "右眉　上下"
+		},
+		{
+			"Id": "PARAM_MOUTH_FORM",
+			"GroupId": "",
+			"Name": "口　変形"
+		},
+		{
+			"Id": "PARAM_MOUTH_OPEN_Y",
+			"GroupId": "",
+			"Name": "口　開閉"
+		},
+		{
+			"Id": "Param7",
+			"GroupId": "",
+			"Name": "tongue"
+		},
+		{
+			"Id": "PARAM_BODY_ANGLE_X",
+			"GroupId": "",
+			"Name": "体の回転　X"
+		},
+		{
+			"Id": "PARAM_BODY_ANGLE_Y",
+			"GroupId": "",
+			"Name": "体の回転　Y"
+		},
+		{
+			"Id": "PARAM_BODY_ANGLE_Z",
+			"GroupId": "",
+			"Name": "体の回転　Z"
+		},
+		{
+			"Id": "PARAM_ARM_L",
+			"GroupId": "",
+			"Name": "左腕"
+		},
+		{
+			"Id": "PARAM_ARM_R",
+			"GroupId": "",
+			"Name": "右腕"
+		},
+		{
+			"Id": "PARAM_BREATH",
+			"GroupId": "",
+			"Name": "呼吸"
+		},
+		{
+			"Id": "PARAM_HAIR_FRONT",
+			"GroupId": "",
+			"Name": "髪揺れ　前"
+		},
+		{
+			"Id": "PARAM_HAIR_SIDE",
+			"GroupId": "",
+			"Name": "髪揺れ　横"
+		},
+		{
+			"Id": "Param13",
+			"GroupId": "",
+			"Name": "胸"
+		},
+		{
+			"Id": "PARAM_HAIR_BACK",
+			"GroupId": "",
+			"Name": "髪揺れ　後ろ"
+		},
+		{
+			"Id": "Param9",
+			"GroupId": "",
+			"Name": "汗"
+		},
+		{
+			"Id": "Param12",
+			"GroupId": "",
+			"Name": "惡魔mode"
+		},
+		{
+			"Id": "Param10",
+			"GroupId": "",
+			"Name": "飾品"
+		}
+	],
+	"ParameterGroups": [],
+	"Parts": [
+		{
+			"Id": "PARTS_01_BODY",
+			"Name": "体"
+		},
+		{
+			"Id": "PARTS_01_NECK",
+			"Name": "首"
+		},
+		{
+			"Id": "PARTS_01_HAIR_BACK_001",
+			"Name": "後ろ髪"
+		},
+		{
+			"Id": "PARTS_01_HAIR_SIDE_001",
+			"Name": "横髪"
+		},
+		{
+			"Id": "PARTS_01_HAIR_FRONT_001",
+			"Name": "前髪"
+		},
+		{
+			"Id": "PARTS_01_EAR_001",
+			"Name": "耳"
+		},
+		{
+			"Id": "PARTS_01_NOSE_001",
+			"Name": "鼻"
+		},
+		{
+			"Id": "PARTS_01_MOUTH_001",
+			"Name": "口"
+		},
+		{
+			"Id": "PARTS_01_BROW_001",
+			"Name": "まゆ毛"
+		},
+		{
+			"Id": "PARTS_01_EYE_BALL_001",
+			"Name": "目玉"
+		},
+		{
+			"Id": "PARTS_01_EYE_001",
+			"Name": "目"
+		},
+		{
+			"Id": "PARTS_01_FACE_001",
+			"Name": "顔"
+		},
+		{
+			"Id": "jacket01",
+			"Name": "jacket"
+		}
+	],
+	"CombinedParameters": [
+		[
+			"PARAM_ANGLE_X",
+			"PARAM_ANGLE_Y"
+		],
+		[
+			"PARAM_BODY_ANGLE_X",
+			"PARAM_BODY_ANGLE_Y"
+		],
+		[
+			"PARAM_HAIR_FRONT",
+			"PARAM_HAIR_SIDE"
+		]
+	]
+}
