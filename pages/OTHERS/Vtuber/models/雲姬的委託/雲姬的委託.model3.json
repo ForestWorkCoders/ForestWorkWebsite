@@ -1,0 +1,26 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "雲姬的委託.moc3",
+		"Textures": [
+			"雲姬的委託.2048/texture_00.png",
+			"雲姬的委託.2048/texture_01.png",
+			"雲姬的委託.2048/texture_02.png",
+			"雲姬的委託.2048/texture_03.png"
+		],
+		"Physics": "雲姬的委託.physics3.json",
+		"DisplayInfo": "雲姬的委託.cdi3.json"
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	]
+}
