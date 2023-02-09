@@ -1,10 +1,16 @@
 var firstSet, secondSet;
 
+/* remove optional end / */ 
+const segments = new URL(window.location.href).pathname.split('/');
+const last = segments.pop() || segments.pop(); // Handle potential trailing slash
+sorted = "pages/TOURNAMENT/Mahjong/pages/json/" + last + ".json"
+//console.log(sorted);
+
 $.when(
     $.getJSON("pages/TOURNAMENT/Mahjong/pages/json/playerlist.json", function(data) {
         firstSet = data;
     }),
-    $.getJSON("pages/TOURNAMENT/Mahjong/pages/json/feburary2022.json", function(data) {
+    $.getJSON(sorted, function(data) {
         secondSet = data;
     })
 ).then(function() {
