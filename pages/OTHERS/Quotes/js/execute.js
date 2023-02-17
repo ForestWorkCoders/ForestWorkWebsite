@@ -1,4 +1,4 @@
-const parentElement = document.querySelector('.container');
+const parentElement = document.querySelector('.explainplease');
 
 fetch('pages/OTHERS/Quotes/json/quote.json')
     .then(response => response.json())
