@@ -1,6 +1,6 @@
 const parentElement = document.querySelector('.container');
 
-fetch('../json/quote.json')
+fetch('pages/OTHERS/Quotes/json/quote.json')
   .then(response => response.json())
   .then(data => {
     data.forEach((item) => {
