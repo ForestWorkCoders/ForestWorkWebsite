@@ -1,34 +1,37 @@
 const parentElement = document.querySelector('.container');
 
 fetch('pages/OTHERS/Quotes/json/quote.json')
-  .then(response => response.json())
-  .then(data => {
-    data.forEach((item) => {
-      const productElement = document.createElement('div');
-      productElement.classList.add('product');
+    .then(response => response.json())
+    .then(data => {
+        data.forEach((item) => {
+            item.messages.forEach((message) => {
 
-      const imgElement = document.createElement('img');
-      imgElement.setAttribute('src', item.image);
-      imgElement.setAttribute('alt', '');
-      imgElement.classList.add('logo');
-      productElement.appendChild(imgElement);
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
 
-      const productInfoElement = document.createElement('div');
-      productInfoElement.classList.add('product__info');
-      productElement.appendChild(productInfoElement);
+                const imgElement = document.createElement('img');
+                imgElement.setAttribute('src', item.image);
+                imgElement.setAttribute('alt', '');
+                imgElement.classList.add('logo');
+                productElement.appendChild(imgElement);
 
-      item.messages.forEach((message) => {
-        const messageElement = document.createElement('p');
-        messageElement.textContent = message;
-        productInfoElement.appendChild(messageElement);
-      });
+                const productInfoElement = document.createElement('div');
+                productInfoElement.classList.add('product__info');
+                productElement.appendChild(productInfoElement);
 
-      const usernameElement = document.createElement('h2');
-      usernameElement.classList.add('fw-bold');
-      usernameElement.textContent = `—— ${item.username}`;
-      productInfoElement.appendChild(usernameElement);
 
-      parentElement.appendChild(productElement);
-    });
-  })
-  .catch(error => console.error(error));
+                const messageElement = document.createElement('p');
+                messageElement.textContent = message;
+                productInfoElement.appendChild(messageElement);
+
+
+                const usernameElement = document.createElement('h2');
+                usernameElement.classList.add('fw-bold');
+                usernameElement.textContent = `—— ${item.username}`;
+                productInfoElement.appendChild(usernameElement);
+
+                parentElement.appendChild(productElement);
+            });
+        });
+    })
+    .catch(error => console.error(error));
