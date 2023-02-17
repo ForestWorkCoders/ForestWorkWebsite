@@ -1,5 +1,5 @@
 const userId = "203029070693269504";
-const token = process.env.DISCORD_TOKEN;
+const token = '%DISCORD_TOKEN%';
 
 fetch(`https://discord.com/api/users/${userId}`, {
   headers: {
