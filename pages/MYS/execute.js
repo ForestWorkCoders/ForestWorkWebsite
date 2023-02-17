@@ -3,7 +3,7 @@ const token = '%DISCORD_TOKEN%';
 
 fetch(`https://discord.com/api/users/${userId}`, {
   headers: {
-    Authorization: `Bearer ${token}`
+    Authorization: `Bot ${token}`
   }
 })
   .then(response => response.json())
