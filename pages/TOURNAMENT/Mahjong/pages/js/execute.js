@@ -63,7 +63,8 @@ $.when(
                     } else {
                         return data;
                     }
-                }
+                },
+                type: 'numeric'
             }
         ],
         "columns": [{
