@@ -61,7 +61,7 @@ $.when(
                 }
                 return '<span style="display: flex; flex-flow: row nowrap; justify-content: center;">' + parseInt(data) + '</span>';
             },
-            "type": "numeric"
+            "type": "num"
         }, {
             "title": "Pfp",
             "data": "pfp",
