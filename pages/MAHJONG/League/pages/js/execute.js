@@ -39,6 +39,23 @@ $.when(
 
     var solution = mergeSets(secondSet, firstSet);
 
+    function sortNumbersIgnoreText(a, b, high) {
+        var reg = /[+-]?((\d+(\.\d*)?)|\.\d+)([eE][+-]?[0-9]+)?/;    
+        a = a.match(reg);
+        a = a !== null ? parseFloat(a[0]) : high;
+        b = b.match(reg);
+        b = b !== null ? parseFloat(b[0]) : high;
+        return ((a < b) ? -1 : ((a > b) ? 1 : 0));    
+    }
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+        "sort-numbers-ignore-text-asc": function (a, b) {
+            return sortNumbersIgnoreText(a, b, Number.POSITIVE_INFINITY);
+        },
+        "sort-numbers-ignore-text-desc": function (a, b) {
+            return sortNumbersIgnoreText(a, b, Number.NEGATIVE_INFINITY) * -1;
+        }
+    });
+
     $('#example').DataTable({
         "scrollX": true,
         "paging": false,
@@ -49,19 +66,18 @@ $.when(
         "pageLength": 25,
         //"autoWidth": true,
         "data": solution,
+        columnDefs: [
+            { 
+                type: 'sort-numbers-ignore-text', 
+                targets : 0 
+            }
+        ],
         "columns": [{
             "title": "Rank",
             "data": "rank",
             "render": function (data, type, row) {
-                switch(data){
-                    case 'DNF':
-                        data = '1000000';
-                    default: // already set, in this case
-                        parseInt(data);
-                }
                 return '<span style="display: flex; flex-flow: row nowrap; justify-content: center;">' + parseInt(data) + '</span>';
-            },
-            "type": "num"
+            }
         }, {
             "title": "Pfp",
             "data": "pfp",
