@@ -49,30 +49,19 @@ $.when(
         "pageLength": 25,
         //"autoWidth": true,
         "data": solution,
-        columnDefs: [
-            {
-                targets: [0, 4],
-                render: function (data, type, row) {
-                    if (type === 'sort') {
-                        switch (data) {
-                            case 'DNF':
-                                return '1000000';
-                            default: // already set, in this case
-                                return parseInt(data) || 0; // Convert the data to an integer or set it to 0 if it's not a number
-                        }
-                    } else {
-                        return data;
-                    }
-                },
-                type: 'numeric'
-            }
-        ],
         "columns": [{
             "title": "Rank",
             "data": "rank",
             "render": function (data, type, row) {
-                return '<span style="display: flex; flex-flow: row nowrap; justify-content: center;">' + data + '</span>';
-            }
+                switch(data){
+                    case 'DNF':
+                        data = '1000000';
+                    default: // already set, in this case
+                        parseInt(data);
+                }
+                return '<span style="display: flex; flex-flow: row nowrap; justify-content: center;">' + parseInt(data) + '</span>';
+            },
+            "type": "numeric"
         }, {
             "title": "Pfp",
             "data": "pfp",
