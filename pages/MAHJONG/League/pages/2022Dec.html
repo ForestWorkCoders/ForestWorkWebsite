@@ -396,16 +396,36 @@
   <script>
     $(document).ready(function () {
       // Initialize table for A组
-      $('#myTableA').DataTable();
+      $('#myTableA').DataTable({
+        paging: false,
+        searching: false,
+        lengthChange: false,
+        info: false
+      });
 
       // Initialize table for B组
-      $('#myTableB').DataTable();
+      $('#myTableB').DataTable({
+        paging: false,
+        searching: false,
+        lengthChange: false,
+        info: false
+      });
 
       // Initialize table for C组
-      $('#myTableC').DataTable();
+      $('#myTableC').DataTable({
+        paging: false,
+        searching: false,
+        lengthChange: false,
+        info: false
+      });
 
       // Initialize table for 决赛
-      $('#myTableF').DataTable();
+      $('#myTableF').DataTable({
+        paging: false,
+        searching: false,
+        lengthChange: false,
+        info: false
+      });
     });
 
   </script>
