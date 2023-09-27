@@ -25,8 +25,7 @@ $(document).ready(function () {
                                 </div>
                                 <div class="card-header" style="background-color:#fefefe"><p style="text-align: right">—— <b>${username}</b></p></div>
                             </div>
-                        </div>
-                    </div>`;
+                        </div>`;
             }
             html += `</div><hr>`;
         }
