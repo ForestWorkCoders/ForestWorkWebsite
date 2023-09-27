@@ -7,10 +7,11 @@ $(document).ready(function () {
             const image = data[i].image;
             const messages = data[i].messages;
 
+            html += `<div class="row">`;
+
             // Generate message HTML
             for (let j = 0; j < messages.length; j++) {
-                html += `<div class="row">
-                        <div class="col-lg-4 col-md-6 mb-3">
+                html += `<div class="col-lg-4 col-md-6 mb-3">
                             <div class="card border border-secondary shadow-0 " style="background-color:#fefefe;">
                                 <div class="card-body">
                                     <div class="row">
@@ -22,13 +23,13 @@ $(document).ready(function () {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-header" style="background-color:#fefefe;"><p class="text-right">—— <b>${username}</b></p></div>
+                                <div class="card-header" style="background-color:#fefefe"><p style="text-align: right">—— <b>${username}</b></p></div>
                             </div>
                         </div>
                     </div>`;
             }
+            html += `</div><hr>`;
         }
-            html += `<hr>`
             return html;
         }
 
