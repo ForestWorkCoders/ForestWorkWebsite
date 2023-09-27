@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Function to generate card elements
     function generateCards(data) {
         let html = '';
@@ -6,6 +6,12 @@ $(document).ready(function() {
             const username = data[i].username;
             const image = data[i].image;
             const messages = data[i].messages;
+
+            // Generate message HTML
+            let messagesHTML = '';
+            for (let j = 0; j < messages.length; j++) {
+                messagesHTML += `<p class="card-text">${messages[j]}</p>`;
+            }
 
             html += `<div class="row">
                         <div class="col-lg-4 col-md-6 mb-3">
@@ -16,7 +22,7 @@ $(document).ready(function() {
                                             <img class="" src="${image}" alt="${username}" width="128px">
                                         </div>
                                         <div class="col-lg-8 col-md-6 col-sm-8">
-                                            <p class="card-text">${messages[0]}</p>
+                                            ${messagesHTML}
                                         </div>
                                     </div>
                                 </div>
