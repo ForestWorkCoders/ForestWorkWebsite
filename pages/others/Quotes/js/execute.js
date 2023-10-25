@@ -33,7 +33,7 @@ $(document).ready(function () {
         }
 
         // Fetch the JSON data and populate the container with the generated cards
-        fetch('pages/OTHERS/Quotes/json/quote.json')
+        fetch('pages/others/Quotes/json/quote.json')
             .then(response => response.json())
             .then(data => {
                 const quotesData = data;
