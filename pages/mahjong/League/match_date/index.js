@@ -134,25 +134,31 @@ function mergeData(febData, participantsData) {
 
 function populateTable(data) {
   var columns = [{
+      title: '排名',
       data: 'rank'
     },
     {
+      title: '頭像',
       data: 'pfp',
       render: renderImage
     },
     {
+      title: 'Discord昵稱',
       data: 'discord_username'
     },
     {
+      title: '雀魂麻將昵稱',
       data: 'mahjongSoul_ID'
     },
     {
+      title: '總分',
       data: 'total'
     }
   ];
 
   for (var i = 0; i < 16; i++) {
     columns.push({
+      title:'Game ' + i,
       data: 'gameScores.' + i,
       render: NaNdisplay
     });
