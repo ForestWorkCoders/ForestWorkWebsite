@@ -1,3 +1,18 @@
+const monthMapping = {
+  "Jan": "一",
+  "Feb": "二",
+  "Mar": "三",
+  "Apr": "四",
+  "May": "五",
+  "Jun": "六",
+  "Jul": "七",
+  "Aug": "八",
+  "Sep": "九",
+  "Oct": "十",
+  "Nov": "十一",
+  "Dec": "十二",
+};
+
 const segments = new URL(window.location.href).search;
 // Split the comment into year and month
 const parts = segments.match(/(\d{4})([A-Za-z]+)/);
@@ -8,6 +23,14 @@ if (parts) {
   monthInput = parts[2]; 
 } else {
   console.error("The comment format is in wrong format.");
+}
+
+if (monthMapping.hasOwnProperty(monthInput)) {
+  // Replace the content of the element with the corresponding Chinese character
+  $("ol li:nth-child(3)").text(monthMapping[monthInput] + "月份");
+  $("h2").text(monthMapping[monthInput] + "月份 林間盃日麻積分賽");
+} else {
+  window.location.href = "../";
 }
 
 // Your web app's Firebase configuration
