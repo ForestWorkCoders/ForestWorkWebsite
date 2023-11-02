@@ -153,7 +153,7 @@ function populateTable(data) {
     }
   });
 
-  var table = $('#participantTable').DataTable({
+ $('#participantTable').DataTable({
     data: data,
     columns: columns,
     "scrollX": true,
