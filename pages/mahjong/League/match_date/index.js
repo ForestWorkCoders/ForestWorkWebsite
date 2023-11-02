@@ -152,13 +152,14 @@ function populateTable(data) {
     },
     {
       title: '總分',
-      data: 'total'
+      data: 'total',
+      type: 'num'
     }
   ];
 
   for (var i = 0; i < 16; i++) {
     columns.push({
-      title:'Game ' + i,
+      title: 'Game ' + i,
       data: 'gameScores.' + i,
       render: NaNdisplay
     });
@@ -186,6 +187,7 @@ function populateTable(data) {
     data: data,
     columns: columns,
     "scrollX": true,
+    "sScrollXInner": "100%",
     "paging": false,
     "lengthChange": true,
     "searching": true,
@@ -201,6 +203,8 @@ function populateTable(data) {
       [4, 'desc']
     ],
   });
+
+  $('#participantTable thead th, #participantTable tbody td').css('text-align', 'center');
 
   function renderImage(data, type, row) {
     if (type === 'display') {
