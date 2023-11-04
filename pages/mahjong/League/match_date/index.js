@@ -116,7 +116,7 @@ function mergeData(febData, participantsData) {
           pfp: participantItem.pfp,
           discord_username: participantItem.discord_username,
           mahjongSoul_ID: participantItem.mahjongSoul_name,
-          total: gameScores.reduce((acc, score) => acc + (score || 0), 0),
+          total: Number.isInteger(gameScores.reduce((acc, score) => acc + (score || 0), 0)) ? totalScore : totalScore.toFixed(2),
           gameScores: gameScores
         }
 
