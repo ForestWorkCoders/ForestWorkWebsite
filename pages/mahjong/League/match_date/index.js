@@ -141,7 +141,7 @@ function mergeData(febData, participantsData) {
 
 function populateTable(data) {
 
-  console.log(data);
+  console.log(data[0].gameScores.length);
 
   var columns = [{
       title: '排名',
@@ -167,7 +167,7 @@ function populateTable(data) {
     }
   ];
 
-  for (var i = 0; i < 16; i++) {
+  for (var i = 0; i < data[0].gameScores.length; i++) {
     columns.push({
       title: 'Game ' + (i+1),
       data: 'gameScores.' + i,
