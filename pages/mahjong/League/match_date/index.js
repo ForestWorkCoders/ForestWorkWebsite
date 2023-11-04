@@ -96,9 +96,7 @@ function mergeData(febData, participantsData) {
     return [];
   }
 
-  console.log(febData);
-  console.log(febData[0].gameScore);
-  //console.log(febData.gameScore.length);
+  console.log(febData[0].gameScore.length);
   
   
 
@@ -109,7 +107,7 @@ function mergeData(febData, participantsData) {
       if (participantItem) {
         const gameScores = [];
 
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < febData[0].gameScore.length; i++) {
           if (!febItem.gameScore[i]) {
             gameScores.push(null);
           } else {
@@ -142,6 +140,9 @@ function mergeData(febData, participantsData) {
 }
 
 function populateTable(data) {
+
+  console.log(data);
+
   var columns = [{
       title: '排名',
       data: 'rank'
