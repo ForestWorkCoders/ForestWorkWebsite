@@ -162,7 +162,7 @@ function populateTable(data) {
 
   for (var i = 0; i < 16; i++) {
     columns.push({
-      title: 'Game ' + i,
+      title: 'Game ' + (i+1),
       data: 'gameScores.' + i,
       render: NaNdisplay
     });
