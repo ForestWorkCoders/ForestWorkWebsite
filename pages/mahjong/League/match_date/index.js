@@ -97,7 +97,7 @@ function mergeData(febData, participantsData) {
   }
 
   console.log(febData);
-  console.log(febData.gameScore);
+  console.log(febData[0].gameScore);
   //console.log(febData.gameScore.length);
   
   
