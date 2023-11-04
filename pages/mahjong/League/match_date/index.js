@@ -96,11 +96,6 @@ function mergeData(febData, participantsData) {
     return [];
   }
 
-  console.log(febData[0].gameScore.length);
-  
-  
-
-
   const mergedData = febData
     .map(febItem => {
       const participantItem = participantsData.find(participant => participant.id === febItem.id);
@@ -127,7 +122,7 @@ function mergeData(febData, participantsData) {
           gameScores: gameScores
         }
 
-        if (gameScores.filter(score => score === null).length > 8) {
+        if (gameScores.filter(score => score === null).length > (febData[0].gameScore.length/2)) {
           result.rank = "DNF";
         }
 
@@ -140,8 +135,6 @@ function mergeData(febData, participantsData) {
 }
 
 function populateTable(data) {
-
-  console.log(data[0].gameScores.length);
 
   var columns = [{
       title: '排名',
