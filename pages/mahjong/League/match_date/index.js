@@ -96,6 +96,10 @@ function mergeData(febData, participantsData) {
     return [];
   }
 
+  console.log(febData.gameScore.length);
+  console.log(febData.gameScore);
+  console.log(febData);
+
 
   const mergedData = febData
     .map(febItem => {
@@ -103,7 +107,7 @@ function mergeData(febData, participantsData) {
       if (participantItem) {
         const gameScores = [];
 
-        for (let i = 0; i < febItem.gameScore.length; i++) {
+        for (let i = 0; i < 16; i++) {
           if (!febItem.gameScore[i]) {
             gameScores.push(null);
           } else {
@@ -160,7 +164,7 @@ function populateTable(data) {
     }
   ];
 
-  for (var i = 0; i < febItem.gameScore.length; i++) {
+  for (var i = 0; i < 16; i++) {
     columns.push({
       title: 'Game ' + (i+1),
       data: 'gameScores.' + i,
