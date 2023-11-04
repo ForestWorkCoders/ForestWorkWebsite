@@ -111,12 +111,15 @@ function mergeData(febData, participantsData) {
           }
         }
 
+        const totalScore = gameScores.reduce((acc, score) => acc + (score || 0), 0);
+        const total = Number.isInteger(totalScore) ? totalScore : totalScore.toFixed(2);
+
         const result = {
           id: participantItem.id,
           pfp: participantItem.pfp,
           discord_username: participantItem.discord_username,
           mahjongSoul_ID: participantItem.mahjongSoul_name,
-          total: Number.isInteger(gameScores.reduce((acc, score) => acc + (score || 0), 0)) ? totalScore : totalScore.toFixed(2),
+          total: total,
           gameScores: gameScores
         }
 
