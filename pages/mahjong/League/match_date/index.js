@@ -96,9 +96,11 @@ function mergeData(febData, participantsData) {
     return [];
   }
 
-  console.log(febData.gameScore.length);
-  console.log(febData.gameScore);
   console.log(febData);
+  console.log(febData.gameScore);
+  //console.log(febData.gameScore.length);
+  
+  
 
 
   const mergedData = febData
