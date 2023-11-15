@@ -45,22 +45,11 @@ const firebaseConfig = {
 
 var index = 1;
 
-// Function to show the loading indicator
-function showLoadingIndicator() {
-  document.getElementById('loading-indicator').style.display = 'block';
-}
-
-// Function to hide the loading indicator
-function hideLoadingIndicator() {
-  document.getElementById('loading-indicator').style.display = 'none';
-}
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Reference to your Firestore collection
 async function fetchAndMergeData() {
-  showLoadingIndicator();
   try {
     const febData = await fetchData("League/" + yearInput + "/" + monthInput);
     const participantsData = await fetchData("Participants");
@@ -82,9 +71,6 @@ async function fetchAndMergeData() {
 }
 
 async function fetchData(collectionName) {
-
-  
-
   const data = [];
   // Use Firebase SDK to fetch data from the collection
 
@@ -236,8 +222,6 @@ function populateTable(data) {
     }
     return data;
   }
-
-  hideLoadingIndicator();
 }
 
 $(document).ready(function () {
