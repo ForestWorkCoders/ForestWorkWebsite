@@ -28,24 +28,12 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div v-for="item in filteredCircuits" :key="item.id"
-        class="group cursor-pointer transition-all duration-300 hover:-translate-y-2">
-        <div
-          class="bg-gray-100 dark:bg-gray-800 rounded-lg p-10 flex flex-col items-center justify-center relative overflow-hidden h-64 shadow-sm border border-transparent group-hover:border-green-500/50">
-
-          <div
-            class="w-32 h-32 bg-white dark:bg-gray-700 rounded flex items-center justify-center shadow-inner mb-6 transition-transform group-hover:scale-110">
-            <UIcon :name="item.icon" class="size-16 text-gray-400 dark:text-gray-500" />
-          </div>
-
-          <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">{{ item.title }}</h3>
-
-          <p class="text-sm text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-center px-4">
-            {{ item.description }}
-          </p>
-        </div>
+        <CircuitCard 
+          v-for="item in filteredCircuits" 
+          :key="item.id" 
+          :item="item" 
+        />
       </div>
-    </div>
 
     <div v-if="filteredCircuits.length === 0" class="text-center py-20">
       <UIcon name="i-lucide-ghost" class="size-12 text-gray-300 mx-auto mb-4" />
@@ -61,12 +49,27 @@ const searchQuery = ref('')
 
 // 1. 定義資料結構
 const circuits = [
-  { id: 1, title: 'Plazma League', icon: 'i-lucide-crosshair', description: '經典橫向捲軸射擊賽事' },
-  { id: 2, title: 'Mahjong Soul', icon: 'i-lucide-id-card-lanyard', description: '雀魂林間小鎮常規積分賽' },
-  { id: 3, title: 'Minecraft UHC', icon: 'i-lucide-pickaxe', description: '超極限生存競賽' },
-  { id: 4, title: 'Another Game 1', icon: 'i-lucide-gamepad', description: '準備中...' },
-  { id: 5, title: 'Another Game 2', icon: 'i-lucide-gamepad', description: '準備中...' },
-  { id: 6, title: 'Another Game 3', icon: 'i-lucide-gamepad', description: '準備中...' },
+  { 
+    id: 1, 
+    title: 'Plazma Burst 2', 
+    icon: 'i-lucide-crosshair', 
+    description: '經典橫向捲軸射擊賽事',
+    to: 'https://plazmaburst2.com' // 這裡換成 PB2 的實際連結
+  },
+  { 
+    id: 2, 
+    title: 'Mahjong Soul', 
+    icon: 'i-lucide-id-card-lanyard', 
+    description: '雀魂林間小鎮常規積分賽',
+    to: 'https://forestwork-mahjong.vercel.app'
+  },
+  { 
+    id: 3, 
+    title: 'Minecraft UHC', 
+    icon: 'i-lucide-pickaxe', 
+    description: '超極限生存競賽',
+    to: 'https://eaglepb2.gitbook.io/uhc_report/'
+  },
 ]
 
 // 2. 即時搜尋過濾邏輯
