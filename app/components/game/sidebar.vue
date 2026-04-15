@@ -5,7 +5,11 @@ defineProps({
     type: String,
     required: true
   },
-  coverImage: {
+  coverImageLight: {
+    type: String,
+    required: true
+  },
+  coverImageDark: {
     type: String,
     required: true
   },
@@ -28,11 +32,12 @@ defineProps({
       <h2 class="font-bold text-gray-900 dark:text-white tracking-widest text-sm transition-colors">{{ gameName }}</h2>
     </div>
 
-    <img 
-      :src="coverImage" 
-      :alt="gameName" 
-      class="w-full object-contain drop-shadow-xl dark:drop-shadow-2xl hover:scale-105 transition-all duration-300"
-    >
+    <UColorModeImage
+     :light="coverImageLight"
+     :dark="coverImageDark"
+     :alt="gameName" 
+     class="w-full object-contain drop-shadow-xl dark:drop-shadow-2xl hover:scale-105 transition-all duration-300"
+    />
 
     <div v-if="description.length > 0" class="bg-white dark:bg-[#0f172a]/80 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden transition-colors duration-200 shadow-sm dark:shadow-none">
       <div class="bg-gray-50 dark:bg-slate-900 p-2 text-center border-b border-gray-200 dark:border-slate-800 transition-colors">

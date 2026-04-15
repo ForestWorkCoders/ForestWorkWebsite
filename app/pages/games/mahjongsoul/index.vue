@@ -4,7 +4,8 @@ import { ref } from 'vue'
 // 定義給 Sidebar 的資料
 const mahjongSidebarData = {
     name: '雀魂麻將 · Mahjong Soul',
-    image: 'https://riichi.wiki/images/Mahjsoullogo.png',
+    image_light: '/images/mahjongSoul/logo-black.png',
+    image_dark: '/images/mahjongSoul/logo-white.png',
     desc: [
         'Mahjong Soul is an online game that adopted the classic Japanese Mahjong gameplay. Here, you can hone your mahjong skills with players from worldwide or spend leisure time with friends, bond with various charismatic characters, and experience an abundance of unique stories.',
         '《雀魂麻將》（MahjongSoul）是Catfood Studio（貓糧工作室）開發的麻將遊戲。該作於2018年6月8日正式發布，於2020年7月15日在steam上線國際中文服。'
@@ -31,6 +32,28 @@ const mockTournaments = [
     { id: 2, title: '林間盃 2025 5月份個人積分賽', tier: 'Tier C', region: 'ASIA' },
     { id: 3, title: '林間盃 2025 4月份個人積分賽', tier: 'Tier C', region: 'ASIA' }
 ]
+
+const pastTournaments = Array.from({ length: 42 }, (_, i) => {
+    const year = 2025 - Math.floor(i / 12)
+    const month = 12 - (i % 12)
+    return {
+        id: `past_${i}`,
+        title: `林間盃 ${year} ${month}月份個人積分賽`,
+        tier: 'Tier C',
+        region: 'ASIA'
+    }
+})
+
+// 分頁狀態管理
+const currentPage = ref(1)
+const itemsPerPage = 6 // 每一頁顯示 6 個賽事
+
+// 計算當前頁面要顯示的資料 (Slice)
+const paginatedPastTournaments = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return pastTournaments.slice(start, end)
+})
 </script>
 
 <template>
@@ -51,7 +74,6 @@ const mockTournaments = [
                         }">
                             <template #default="{ item, selected }">
                                 <div class="text-center py-2 transition-colors duration-200">
-
                                     <div class="font-bold text-sm tracking-wider transition-colors"
                                         :class="selected
                                             ? 'text-gray-900 dark:text-white'
@@ -62,27 +84,87 @@ const mockTournaments = [
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors">
                                         {{ item.description }}
                                     </div>
+                                </div>
 
+                            </template>
+
+
+
+                            <template #ongoing>
+                                <div class="mt-2 space-y-4">
+                                    <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass-20-solid"
+                                        placeholder="Search Ongoing Tournaments..." color="gray" variant="outline"
+                                        class="w-full" :ui="{
+                                            base: 'bg-white dark:bg-[#0f172a] border-gray-200 dark:border-[#1e293b] text-gray-900 dark:text-white transition-colors duration-200',
+                                            icon: { base: 'text-gray-500 dark:text-gray-400 transition-colors' }
+                                        }" />
+                                </div>
+                                <div class="mt-4 space-y-6">
+                                    <div class="space-y-3">
+                                        <TournamentCard v-for="tourney in mockTournaments" :key="tourney.id"
+                                            :tourney="tourney" />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template #past>
+                                <div class="mt-2 space-y-4">
+                                    <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass-20-solid"
+                                        placeholder="Search Past Tournaments..." color="gray" variant="outline"
+                                        class="w-full" :ui="{
+                                            base: 'bg-white dark:bg-[#0f172a] border-gray-200 dark:border-[#1e293b] text-gray-900 dark:text-white transition-colors duration-200',
+                                            icon: { base: 'text-gray-500 dark:text-gray-400 transition-colors' }
+                                        }" />
+                                </div>
+                                <div class="mt-4 space-y-6">
+                                    <div class="space-y-3">
+                                        <TournamentCard v-for="tourney in paginatedPastTournaments" :key="tourney.id"
+                                            :tourney="tourney" />
+                                    </div>
+
+                                    <div v-if="pastTournaments.length > itemsPerPage"
+                                        class="flex justify-center pt-4 border-t border-gray-200 dark:border-slate-800 transition-colors duration-200">
+                                        <UPagination :model-value="currentPage" :page="currentPage"
+                                            @update:model-value="currentPage = $event"
+                                            @update:page="currentPage = $event" :page-count="itemsPerPage"
+                                            :items-per-page="itemsPerPage" :total="pastTournaments.length" :ui="{
+                                                wrapper: 'flex items-center gap-1',
+                                                rounded: '!rounded-full',
+                                                default: {
+                                                    activeButton: { variant: 'solid', color: 'gray', class: 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' },
+                                                    inactiveButton: { variant: 'ghost', color: 'gray', class: 'hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors' }
+                                                }
+                                            }" />
+                                    </div>
+
+                                </div>
+                            </template>
+
+                            <template #upcoming>
+                                <div class="mt-2 space-y-4">
+                                    <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass-20-solid"
+                                        placeholder="Search Future Tournaments..." color="gray" variant="outline"
+                                        class="w-full" :ui="{
+                                            base: 'bg-white dark:bg-[#0f172a] border-gray-200 dark:border-[#1e293b] text-gray-900 dark:text-white transition-colors duration-200',
+                                            icon: { base: 'text-gray-500 dark:text-gray-400 transition-colors' }
+                                        }" />
+                                </div>
+                                <div
+                                    class="mt-4 p-12 text-center border border-gray-200 dark:border-slate-800 rounded-lg bg-white/50 dark:bg-[#0f172a]/50">
+                                    <UIcon name="i-heroicons-calendar-days"
+                                        class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                                    <p class="text-gray-500 dark:text-gray-400">目前沒有即將開始的賽事</p>
                                 </div>
                             </template>
                         </UTabs>
 
-                        <UInput v-model="searchQuery" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search"
-                            color="gray" variant="outline" class="w-full" :ui="{
-                                base: 'bg-white dark:bg-[#0f172a] border-gray-200 dark:border-[#1e293b] text-gray-900 dark:text-white transition-colors duration-200',
-                                icon: { base: 'text-gray-500 dark:text-gray-400 transition-colors' }
-                            }" />
-
-
-                        <div class="space-y-3 mt-4">
-                            <TournamentCard v-for="tourney in mockTournaments" :key="tourney.id" :tourney="tourney" />
-                        </div>
-
                     </div>
 
                     <div class="lg:col-span-4 space-y-6">
-                        <GameSidebar :gameName="mahjongSidebarData.name" :coverImage="mahjongSidebarData.image"
-                            :description="mahjongSidebarData.desc" :links="mahjongSidebarData.socialLinks" />
+                        <GameSidebar :gameName="mahjongSidebarData.name"
+                            :coverImageLight="mahjongSidebarData.image_light"
+                            :coverImageDark="mahjongSidebarData.image_dark" :description="mahjongSidebarData.desc"
+                            :links="mahjongSidebarData.socialLinks" />
                     </div>
 
                 </div>
