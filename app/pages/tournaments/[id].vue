@@ -147,6 +147,14 @@ const isModernInvitational = computed(() => {
                             </div>
                         </template>
 
+                        <template #stats>
+                            <TournamentsPlayerStatsStandard :tournament-id="route.params.id" />
+                        </template>
+
+                        <template #vods>
+                            <TournamentsVodsStandard :tournament-id="route.params.id" />
+                        </template>
+
                     </UTabs>
                 </div>
             </UContainer>
