@@ -14,7 +14,7 @@ const getColumns = (gameCount) => {
   const baseCols = [
     { id: 'rank', accessorKey: 'rank', header: 'RANK', class: 'text-center w-20' },
     { id: 'player', accessorKey: 'name', header: 'PLAYER', class: 'min-w-[150px]' },
-    { id: 'total', accessorKey: 'total', header: 'TOTAL', class: 'text-right w-24' }
+    { id: 'total', accessorKey: 'total', header: 'TOTAL', class: 'text-center w-24' }
   ]
 
   const gameCols = Array.from({ length: gameCount }, (_, i) => ({
@@ -97,7 +97,7 @@ const getRankColor = (phase, rank) => {
             </template>
 
             <template #total-cell="{ row }">
-              <div class="text-right font-black text-lg font-mono text-white">
+              <div class="text-center font-black text-lg font-mono text-white">
                 {{ row.original.total }}
               </div>
             </template>
