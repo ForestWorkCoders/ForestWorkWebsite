@@ -2,10 +2,11 @@
 // 定義教學 PDF 檔案的路徑 (請確認檔案已放置於此路徑)
 const pdfUrl = '/docs/MahjongHowTo2025.pdf'
 
-const breadcrumbLinks = [
+const breadcrumbLinks = ref([
   { label: '首頁 · Home', icon: 'i-lucide-home', to: '/' },
-  { label: '平台教學 · How-to', icon: 'i-lucide-help-circle' } // 當前頁面
-]
+  { label: '賽事大廳 · Tournaments', icon: 'i-lucide-trophy', to: '/games/mahjongsoul' },
+  { label: '加入雀魂比賽場教學 · How-to', icon: 'i-lucide-help-circle' } // 當前頁面
+])
 
 // 設定網頁標題
 useHead({
@@ -14,14 +15,14 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-[#1a1b26] py-12 px-4 sm:px-6 animate-fade-in">
+  <div class="min-h-screen bg-gray-50 dark:bg-[#1a1b26] pt-24 pb-12 px-4 sm:px-6 animate-fade-in">
 
     <UContainer class="max-w-5xl">
 
       <div class="mb-8 px-2 animate-fade-in">
         <UBreadcrumb 
-                    :links="breadcrumbLinks" 
-                    divider="i-lucide-chevron-right"
+                    :items="breadcrumbLinks" 
+                    separator="i-lucide-chevron-right"
                     :ui="{
                         wrapper: 'flex flex-wrap items-center gap-1.5',
                         li: 'flex items-center gap-1.5',
@@ -29,7 +30,7 @@ useHead({
                         active: 'text-emerald-500 dark:text-emerald-400 cursor-default drop-shadow-md',
                         inactive: 'text-gray-400 hover:text-emerald-500 dark:text-gray-500 dark:hover:text-emerald-400',
                         icon: { base: 'w-4 h-4', active: 'text-emerald-500', inactive: 'text-gray-500' },
-                        divider: { base: 'w-4 h-4 text-gray-500' }
+                        separator: { base: 'w-4 h-4 text-gray-500' }
                     }"
                 />
       </div>

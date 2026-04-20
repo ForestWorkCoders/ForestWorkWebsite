@@ -15,7 +15,7 @@ const breadcrumbLinks = computed(() => {
         { 
             label: '賽事大廳 · Tournaments', 
             icon: 'i-lucide-trophy', 
-            to: '/tournaments' // 假設你的賽事列表頁在這裡
+            to: '/games/mahjongsoul' // 假設你的賽事列表頁在這裡
         },
         { 
             // 如果還在載入中，顯示佔位符；載入完成後顯示賽事簡稱或標題
@@ -74,9 +74,10 @@ const isModernInvitational = computed(() => {
         <div class="min-h-screen bg-black/50 backdrop-blur-sm pt-20 pb-12">
 
             <UContainer class="max-w-6xl">
+                <div class="mb-8 px-2 animate-fade-in">
                 <UBreadcrumb 
-                        :links="breadcrumbLinks" 
-                        divider="i-lucide-chevron-right"
+                        :items="breadcrumbLinks" 
+                        separator="i-lucide-chevron-right"
                         :ui="{
                             wrapper: 'flex flex-wrap items-center gap-1.5',
                             li: 'flex items-center gap-1.5',
@@ -84,10 +85,11 @@ const isModernInvitational = computed(() => {
                             active: 'text-white dark:text-gray-200 cursor-default drop-shadow-md',
                             inactive: 'text-gray-400 hover:text-emerald-400 dark:text-gray-500 dark:hover:text-emerald-400',
                             icon: { base: 'w-4 h-4', active: 'text-emerald-500', inactive: 'text-gray-500' },
-                            divider: { base: 'w-4 h-4 text-gray-500' }
+                            separator: { base: 'w-4 h-4 text-gray-500' }
                         }"
                     />
-                    
+                    </div>
+
                 <div
                     class="bg-white/90 dark:bg-[#1a1b26] text-gray-900 dark:text-white rounded-t-xl overflow-hidden shadow-2xl flex flex-col md:flex-row p-8 md:p-16 gap-12 items-center md:items-start border border-gray-200 dark:border-gray-800 transition-colors duration-300">
 
