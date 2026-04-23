@@ -40,7 +40,8 @@ const { data: dashboardData, pending, error } = await useFetch(`/api/mahjong/tou
           </h2>
         </div>
 
-        <BaseLeaderboardTable 
+        <TournamentsBaseLeaderboardTable
+          :entity-type="dashboardData.config.entity_type" 
           :columns="dashboardData.config.columns"
           :data="dashboardData.data[phase.id]?.leaderboard || []"
           :is-final="phase.is_final"
@@ -52,7 +53,7 @@ const { data: dashboardData, pending, error } = await useFetch(`/api/mahjong/tou
             <span class="text-sm font-medium tracking-wide">備註保留區塊</span>
         </div>
 
-        <BaseMatchGrid 
+        <TournamentsBaseMatchGrid 
           :matches="dashboardData.data[phase.id]?.matches || []"
         />
 

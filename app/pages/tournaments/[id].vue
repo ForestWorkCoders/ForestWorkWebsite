@@ -29,6 +29,8 @@ const contentUrl = computed(() => {
         parsed = rawConfig
     }
 
+    console.log('Parsed Content URL:', parsed.content_url)
+
     // 只要你的 JSON 裡面有設定 content_url，所有賽事都能讀到！
     return parsed.content_url || null
 })
@@ -199,7 +201,6 @@ const tabs = computed(() => {
 
                         <template #prereq>
                             <div class="bg-white/90 dark:bg-[#1a1b26] px-4 md:px-6 mt-2 space-y-12 animate-fade-in">
-
                                 <TournamentsLeaderboardInvitational :tournament-id="route.params.id" />
                             </div>
                         </template>
@@ -212,10 +213,10 @@ const tabs = computed(() => {
 
                         <template #result>
                             <div class="bg-white/90 dark:bg-[#1a1b26] px-4 md:px-6 mt-2 space-y-12 animate-fade-in">
-                                <TournamentsResultDashboard :tournament-id="route.params.id" />
+                                <TournamentsDashboard :tournament-id="route.params.id" />
                             </div>
                         </template>
-                        
+
                         <template #stats>
                             <TournamentsPlayerStatsStandard :tournament-id="route.params.id" />
                         </template>
