@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@nuxtjs/supabase', '@vercel/speed-insights/nuxt', '@vercel/analytics/nuxt'],
   css: ['~/assets/css/main.css'],
 
+
+  build: {
+    transpile: ['motion-v', 'chart.js', 'vue-chartjs']
+  },
+
   supabase: {
     // 預設情況下，這個模組會強制所有頁面都要登入才能看。
     // 我們是公開的賽事網站，所以必須把 redirect 關掉。
