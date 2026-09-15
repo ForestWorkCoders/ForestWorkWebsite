@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SpeedInsights } from '@vercel/speed-insights/vue';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/vue';
 
 useSeoMeta({
     title: '林間小鎮 · ForestWork',
