@@ -9,9 +9,10 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "update-database": "npx supabase gen types typescript --project-id efsheupssjxlmrfgmxwp --schema public,mahjong,plazmaburst > app/types/database.types.ts",
-    "gartic-sync": "node --env-file=.env scripts/sync-gartic-manifest.js",
-    "test-redirects": "node scripts/verify-redirects.mjs"
+    "database:sync": "npx supabase gen types typescript --project-id efsheupssjxlmrfgmxwp --schema public --schema mahjong --schema plazmaburst --schema ctf > types/database.types.ts",
+    "gartic:sync": "node --env-file=.env scripts/sync-gartic-manifest.js",
+    "url:redirects": "node scripts/verify-redirects.mjs",
+    "ctf:hash": "node scripts/hash-flag.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.117",
