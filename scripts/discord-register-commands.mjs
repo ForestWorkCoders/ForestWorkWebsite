@@ -17,17 +17,55 @@ const commonCommands = [
 const diceCommands = [
     {
         name: 'roll',
-        description: 'TRPG 骰子投擲',
+        description: 'TRPG 骰子投擲 (支援最佳/最差篩選)',
         options: [
-            { name: 'count', description: '骰子數量', type: 4, required: true, min_value: 1 },
-            { name: 'faces', description: '骰子面數', type: 4, required: true, min_value: 1 }
+            {
+                name: 'count',
+                description: '骰子數量 (預設 1, 上限 100)',
+                type: 4, // INTEGER
+                required: true,
+                min_value: 1,
+                max_value: 100
+            },
+            {
+                name: 'faces',
+                description: '骰子面數 (如 6, 20, 100)',
+                type: 4, // INTEGER
+                required: true,
+                min_value: 1,
+                max_value: 10000
+            },
+            {
+                name: 'desc',
+                description: '投擲備註原因 (可選)',
+                type: 3, // STRING
+                required: false
+            },
+            {
+                name: 'keep',
+                description: '篩選保留模式 (可選)',
+                type: 3, // STRING
+                required: false,
+                choices: [
+                    { name: '保留最好 (Best)', value: 'best' },
+                    { name: '保留最差 (Worst)', value: 'worst' }
+                ]
+            },
+            {
+                name: 'keep_count',
+                description: '保留的骰子數量 (配合 keep 模式)',
+                type: 4, // INTEGER
+                required: false,
+                min_value: 1
+            }
         ]
     },
     {
         name: 'cc',
         description: 'COC 1D100 技能檢定',
         options: [
-            { name: 'target', description: '技能目標值', type: 4, required: true, min_value: 1, max_value: 100 }
+            { name: 'target', description: '技能目標值', type: 4, required: true, min_value: 1, max_value: 100 },
+            { name: 'desc', description: '檢定項目名稱 (如 偵查、力量、聆聽)', type: 3, required: false }
         ]
     },
     {
