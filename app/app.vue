@@ -22,28 +22,33 @@ const discordEmbedPayload = {
     accent_color: 5011302, // #4C7766 林间墨绿
     spoiler: false,
     components: [
+      // 1. 顶部文本区：标题 + 描述
       {
-        type: 9, // Section 块 (带右侧小图)
-        components: [
-          {
-            type: 10, // Text
-            content: '# 林間小鎮 · ForestWork\n林間小鎮賽事歷史與社群活動中心。\n即時牌譜查閱、賽事積分追蹤與趣味同樂。'
-          }
-        ],
-        accessory: {
-          type: 11, // Thumbnail 媒体缩略图
-          media: {
-            url: 'https://i.imgur.com/cu2YAkn.png'
-          }
-        }
+        type: 10, // 纯文本组件 (Text Display)
+        content: '# 林間小鎮 · ForestWork\n林間小鎮賽事歷史與社群活動中心。即時牌譜查閱、賽事積分追蹤與趣味同樂。'
       },
+      // 2. 核心：独立通栏大横幅 (不再放在 accessory 里面挤压文字)
       {
-        type: 14, // Divider 分割线
+        type: 12, // Media Gallery / Banner Container
+        items: [
+          {
+            media: {
+              url: 'https://i.imgur.com/cu2YAkn.png'
+            },
+            description: 'ForestWork Banner',
+            spoiler: false
+          }
+        ]
+      },
+      // 3. 视觉分割线
+      {
+        type: 14, // Divider
         spacing: 1,
         divider: true
       },
+      // 4. 底部保留完整交互按钮组
       {
-        type: 1, // Action Row 按钮容器
+        type: 1, // Action Row
         components: [
           {
             type: 2, // Button
