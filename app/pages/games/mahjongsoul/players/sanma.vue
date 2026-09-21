@@ -24,9 +24,16 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-gray-400">
                         統計時間範圍 (Timeline Scope)
                     </span>
-                    <span class="text-xs font-mono text-gray-500">
-                        當前區間: {{ dateRange.start }} ~ {{ dateRange.end }}
-                    </span>
+                    <!-- 在時間區間控制的下緣插入此排賽制過濾器 -->
+                    <div
+                        class="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center gap-6 text-xs font-mono">
+                        <span class="text-gray-400 font-bold uppercase tracking-wider">特殊賽制過濾:</span>
+                        <div class="flex items-center gap-4">
+                            <UCheckbox v-model="excludeInvitational" name="excludeInvitational"
+                                label="排除邀請賽 (Invitational)" />
+                            <UCheckbox v-model="excludeGroup" name="excludeGroup" label="排除分組/團體賽 (Group / Relay)" />
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex flex-wrap items-center justify-between gap-4">
@@ -156,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { use } from 'echarts/core'
 import { PieChart, LineChart, RadarChart } from 'echarts/charts'
 import { TooltipComponent, LegendComponent, GridComponent } from 'echarts/components'
@@ -165,228 +172,235 @@ import VChart from 'vue-echarts'
 
 use([PieChart, LineChart, RadarChart, TooltipComponent, LegendComponent, GridComponent, CanvasRenderer])
 
-// 1. 选手数据契约：使用 Nuxt UI v3 原生的 SelectMenuItem 结构 (label + id)
 interface PlayerItem {
     id: number
     label: string
 }
 
-interface MatchdayItem {
+interface DatePreset {
     id: string
     label: string
+    start: string
+    end: string
 }
 
-// 3. 选手列表：使用确定性的 PlayerItem[]
-const playerItems = ref<PlayerItem[]>([
-    { label: 'Klm1200', id: 9577962 },
-    { label: 'starekingz', id: 15923304 },
-    { label: '段爻九', id: 13739173 }
-])
-const selectedPlayerId = ref<number>(9577962)
+const excludeInvitational = ref(false)
+const excludeGroup = ref(false)
 
-const dateRange = reactive({
-    start: '2024-06',
-    end: '2025-06' // 👈 完美容納 2024 年 6 月到 2025 年 6 月跨年查詢！
-})
+// 1. 真實選手列表載入
+const { data: playerItemsData } = await useFetch<PlayerItem[]>('/api/mahjong/players')
+const playerItems = computed(() => playerItemsData.value || [])
 
+// 預設選中第一位選手
+const selectedPlayerId = ref<number>(playerItems.value[0]?.id || 9577962)
+const currentPlayer = computed(() => playerItems.value.find(p => p.id === selectedPlayerId.value))
+
+// 2. 時間範圍狀態
 const careerBounds = reactive({
     start: '2023-01',
     end: '2026-12'
 })
 
-// 3. 快捷預設定義 (本質是巨集指令)
-const presets = [
-    { id: 'all', label: '生涯全部', start: careerBounds.start, end: careerBounds.end },
-    { id: 'recent_1y', label: '近12個月', start: '2025-07', end: '2026-06' },
-    { id: '2025', label: '2025全年', start: '2025-01', end: '2025-12' },
-    { id: '2024', label: '2024全年', start: '2024-01', end: '2024-12' },
-    { id: '2023', label: '2023全年', start: '2023-01', end: '2023-12' }
-]
+const dateRange = reactive({
+    start: '2023-01',
+    end: '2026-12'
+})
 
+// ==========================================
+// 动态计算近 12 个月 (以当前系统时钟为基准)
+// ==========================================
+const getRolling12Months = () => {
+    const now = new Date()
+    const endYear = now.getFullYear()
+    const endMonth = now.getMonth() + 1 // 1 ~ 12
+    const end = `${endYear}-${String(endMonth).padStart(2, '0')}`
+
+    // 铁律：把 day 固定为 1 号，防止 31 号发生 JS 跨月溢出 Bug
+    // 往前推 11 个月：当前月(1) + 过去11个月 = 整整 12 个自然月
+    const startDate = new Date(endYear, endMonth - 1 - 11, 1)
+    const startYear = startDate.getFullYear()
+    const startMonth = startDate.getMonth() + 1
+    const start = `${startYear}-${String(startMonth).padStart(2, '0')}`
+
+    return { start, end }
+}
+
+// 3. 巨集预设清单：近12个月完全动态求值
+const presets = computed<DatePreset[]>(() => {
+    const rolling12 = getRolling12Months()
+
+    return [
+        { id: 'all', label: '生涯全部', start: careerBounds.start, end: careerBounds.end },
+        { id: 'recent_1y', label: '近12個月', start: rolling12.start, end: rolling12.end },
+        { id: '2026', label: '2026全年', start: '2026-01', end: '2026-12' },
+        { id: '2025', label: '2025全年', start: '2025-01', end: '2025-12' },
+        { id: '2024', label: '2024全年', start: '2024-01', end: '2024-12' },
+        { id: '2023', label: '2023全年', start: '2023-01', end: '2023-12' }
+    ]
+})
+
+// 4. 計算當前是否有預設按鈕被激活 (純查詢)
 const activePresetId = computed(() => {
-    const hit = presets.find(p => p.start === dateRange.start && p.end === dateRange.end)
+    const hit = presets.value.find(p => p.start === dateRange.start && p.end === dateRange.end)
     return hit ? hit.id : 'custom'
 })
 
-const applyPreset = (preset: typeof presets[0]) => {
+// 5. 點擊預設時的賦值巨集
+const applyPreset = (preset: DatePreset) => {
     dateRange.start = preset.start
     dateRange.end = preset.end
 }
 
-// 此时 p 的类型被百分之百锁定为 PlayerItem，无任何 union 杂质
-// currentPlayer 的类型精准推导为 PlayerItem | undefined
-const currentPlayer = computed(() => playerItems.value.find(p => p.id === selectedPlayerId.value))
+// 3. 響應式載入該選手真實戰績
+const { data: statsData, pending: loadingStats } = await useFetch(
+    () => `/api/mahjong/players/${selectedPlayerId.value}/sanma`,
+    {
+        query: computed(() => ({
+            start: dateRange.start || undefined,
+            end: dateRange.end || undefined,
+            exclude_invitational: excludeInvitational.value ? 'true' : undefined,
+            exclude_group: excludeGroup.value ? 'true' : undefined
+        }))
+    }
+)
 
-// 3. 顺位饼图配置 (三麻仅 1st, 2nd, 3rd)
-const rankCounts = ref({ rank1: 18, rank2: 12, rank3: 6 })
-const pieOption = computed(() => ({
-    tooltip: { trigger: 'item', formatter: '{b}: {c}次 ({d}%)' },
-    legend: { bottom: '0', textStyle: { color: '#9ca3af' } },
-    series: [{
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 6, borderColor: '#1f2937', borderWidth: 2 },
-        label: { show: false },
-        data: [
-            { value: rankCounts.value.rank1, name: '1st Place', itemStyle: { color: '#10b981' } },
-            { value: rankCounts.value.rank2, name: '2nd Place', itemStyle: { color: '#f59e0b' } },
-            { value: rankCounts.value.rank3, name: '3rd Place', itemStyle: { color: '#ef4444' } }
-        ]
-    }]
-}))
+// 同步資料庫吐出的真實生涯起止時間
+watch(statsData, (newData) => {
+    if (newData?.careerBounds) {
+        careerBounds.start = newData.careerBounds.start
+        careerBounds.end = newData.careerBounds.end
+    }
+}, { immediate: true })
 
-// 4. 最近 20 场三麻走势 (顺位 1/2/3，Y 轴倒置)
-const recentRanks = ref([1, 2, 1, 3, 2, 1, 1, 2, 3, 1, 2, 1, 1, 3, 2, 1, 2, 1, 1, 2])
-const lineOption = computed(() => ({
-    tooltip: { trigger: 'axis', formatter: '第 {b} 場: 第 {c} 位' },
-    grid: { left: '40', right: '20', top: '20', bottom: '30' },
-    xAxis: {
-        type: 'category',
-        data: Array.from({ length: recentRanks.value.length }, (_, i) => i + 1),
-        axisLine: { lineStyle: { color: '#374151' } }
-    },
-    yAxis: {
-        type: 'value',
-        inverse: true,
-        min: 1,
-        max: 3,
-        interval: 1,
-        axisLabel: {
-            formatter: (v: number) => v === 1 ? '1st' : v === 2 ? '2nd' : '3rd'
-        },
-        splitLine: { lineStyle: { color: '#1f2937' } }
-    },
-    series: [{
-        data: recentRanks.value,
-        type: 'line',
-        smooth: true,
-        symbolSize: 8,
-        itemStyle: { color: '#3b82f6' },
-        lineStyle: { width: 3, color: '#3b82f6' },
-        areaStyle: { color: 'rgba(59, 130, 246, 0.1)' }
-    }]
-}))
-
-// 1. 模拟的底层单局指标（来自 paipu_rounds 聚合）
-// atk: 平均打点, spd: 和牌巡数, def: 放铳率(%), luk: 近20局役种总数
-const rawRadarStats = ref({
-    atk: 7850,   // 近100局平均打点 (点)
-    spd: 9.4,    // 近100局平均和牌巡数 (巡，越小越牛)
-    def: 12.8,   // 近100局放铳率 (%，越小越牛)
-    luk: 21      // 近20局累计役种数
+// 4. 順位餅圖配置
+const pieOption = computed(() => {
+    const p = statsData.value?.placements || { rank1: 0, rank2: 0, rank3: 0, total: 0 }
+    return {
+        tooltip: { trigger: 'item', formatter: '{b}: {c}次 ({d}%)' },
+        legend: { bottom: '0', textStyle: { color: '#9ca3af' } },
+        series: [{
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: { borderRadius: 6, borderColor: '#1f2937', borderWidth: 2 },
+            label: { show: false },
+            data: p.total > 0 ? [
+                { value: p.rank1, name: '1st Place', itemStyle: { color: '#10b981' } },
+                { value: p.rank2, name: '2nd Place', itemStyle: { color: '#f59e0b' } },
+                { value: p.rank3, name: '3rd Place', itemStyle: { color: '#ef4444' } }
+            ] : [
+                { value: 1, name: '無出賽記錄', itemStyle: { color: '#374151' } }
+            ]
+        }]
+    }
 })
 
-// 2. 好品味数学引擎：将不同物理量纲反转并归一化为 0~100 分数
-const normalizedRadarScores = computed(() => {
-    const { atk, spd, def, luk } = rawRadarStats.value
+// 5. 最近 20 場走勢配置
+const lineOption = computed(() => {
+    const ranks = statsData.value?.recentRanks || []
+    return {
+        tooltip: { trigger: 'axis', formatter: '第 {b} 場: 第 {c} 位' },
+        grid: { left: '40', right: '20', top: '20', bottom: '30' },
+        xAxis: {
+            type: 'category',
+            data: Array.from({ length: ranks.length }, (_, i) => i + 1),
+            axisLine: { lineStyle: { color: '#374151' } }
+        },
+        yAxis: {
+            type: 'value',
+            inverse: true,
+            min: 1,
+            max: 3,
+            interval: 1,
+            axisLabel: { formatter: (v: number) => v === 1 ? '1st' : v === 2 ? '2nd' : '3rd' },
+            splitLine: { lineStyle: { color: '#1f2937' } }
+        },
+        series: [{
+            data: ranks,
+            type: 'line',
+            smooth: true,
+            symbolSize: 8,
+            itemStyle: { color: '#3b82f6' },
+            lineStyle: { width: 3, color: '#3b82f6' },
+            areaStyle: { color: 'rgba(59, 130, 246, 0.1)' }
+        }]
+    }
+})
 
-    // 攻：以 10000 点为满分标准
-    const atkScore = Math.min(100, Math.max(0, (atk / 10000) * 100))
-    // 速：基准 15 巡为 0 分，6 巡为 100 分 (反向倒置)
-    const spdScore = Math.min(100, Math.max(0, ((15 - spd) / (15 - 6)) * 100))
-    // 防：基准 25% 放铳为 0 分，0% 放铳为 100 分 (反向倒置)
-    const defScore = Math.min(100, Math.max(0, ((25 - def) / 25) * 100))
-    // 运：20 局内以 30 个役为满分
-    const lukScore = Math.min(100, Math.max(0, (luk / 30) * 100))
+// 6. 四維雷達圖配置
+const radarOption = computed(() => {
+    const raw = statsData.value?.radarStats || { atk: 0, spd: 0, def: 0, luk: 0 }
 
-    return [
+    const atkScore = Math.min(100, Math.max(0, (raw.atk / 10000) * 100))
+    const spdScore = raw.spd > 0 ? Math.min(100, Math.max(0, ((15 - raw.spd) / (15 - 6)) * 100)) : 0
+    const defScore = Math.min(100, Math.max(0, ((25 - raw.def) / 25) * 100))
+    const lukScore = Math.min(100, Math.max(0, (raw.luk / 30) * 100))
+
+    const scores = [
         Number(atkScore.toFixed(1)),
         Number(spdScore.toFixed(1)),
         Number(defScore.toFixed(1)),
         Number(lukScore.toFixed(1))
     ]
-})
-
-// 3. ECharts 雷达图配置
-const radarOption = computed(() => ({
-    tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(17, 24, 39, 0.95)',
-        borderColor: '#374151',
-        textStyle: { color: '#f3f4f6', fontSize: 12 },
-        formatter: () => `
-      <div class="font-bold border-b border-gray-700 pb-1 mb-1 text-emerald-400">四維作風指標</div>
-      <div>攻 (ATK): ${normalizedRadarScores.value[0]}分 <span class="text-xs text-gray-400">(${rawRadarStats.value.atk}点)</span></div>
-      <div>速 (SPD): ${normalizedRadarScores.value[1]}分 <span class="text-xs text-gray-400">(${rawRadarStats.value.spd}巡)</span></div>
-      <div>防 (DEF): ${normalizedRadarScores.value[2]}分 <span class="text-xs text-gray-400">(铳率 ${rawRadarStats.value.def}%)</span></div>
-      <div>運 (LUK): ${normalizedRadarScores.value[3]}分 <span class="text-xs text-gray-400">(${rawRadarStats.value.luk}役)</span></div>
-    `
-    },
-    radar: {
-        indicator: [
-            { name: '攻 ATK\n(打點)', max: 100 },
-            { name: '速 SPD\n(巡數)', max: 100 },
-            { name: '防 DEF\n(守備)', max: 100 },
-            { name: '運 LUK\n(番運)', max: 100 }
-        ],
-        radius: '65%',
-        splitNumber: 4,
-        axisName: {
-            color: '#9ca3af',
-            fontSize: 11,
-            fontWeight: 'bold'
-        },
-        splitLine: {
-            lineStyle: { color: 'rgba(156, 163, 175, 0.2)' }
-        },
-        splitArea: {
-            show: true,
-            areaStyle: {
-                color: ['rgba(255, 255, 255, 0.01)', 'rgba(255, 255, 255, 0.03)']
-            }
-        },
-        axisLine: {
-            lineStyle: { color: 'rgba(156, 163, 175, 0.2)' }
-        }
-    },
-    series: [{
-        type: 'radar',
-        data: [{
-            value: normalizedRadarScores.value,
-            name: '選手風格',
-            itemStyle: { color: '#10b981' },
-            areaStyle: { color: 'rgba(16, 185, 129, 0.25)' },
-            lineStyle: { width: 2, color: '#10b981' },
-            symbolSize: 6
-        }]
-    }]
-}))
-
-// 1. 和牌形態統計數據 (來自 paipu_rounds 聚合：立直和 / 默聽和 / 副露和)
-const winStyleCounts = ref({
-    riichi: 24, // 立直和牌次數
-    dama: 8,    // 默聽和牌次數
-    fulo: 13    // 副露和牌次數
-})
-
-// 2. 計算和牌形態餅圖配置 (自動計算百分比)
-const winStyleOption = computed(() => {
-    const total = winStyleCounts.value.riichi + winStyleCounts.value.dama + winStyleCounts.value.fulo
 
     return {
         tooltip: {
             trigger: 'item',
-            formatter: '{b}: {c}次 ({d}%)'
+            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+            borderColor: '#374151',
+            textStyle: { color: '#f3f4f6', fontSize: 12 },
+            formatter: () => `
+        <div class="font-bold border-b border-gray-700 pb-1 mb-1 text-emerald-400">四維作風指標</div>
+        <div>攻 (ATK): ${scores[0]}分 <span class="text-xs text-gray-400">(${raw.atk}點)</span></div>
+        <div>速 (SPD): ${scores[1]}分 <span class="text-xs text-gray-400">(${raw.spd}巡)</span></div>
+        <div>防 (DEF): ${scores[2]}分 <span class="text-xs text-gray-400">(銃率 ${raw.def}%)</span></div>
+        <div>運 (LUK): ${scores[3]}分 <span class="text-xs text-gray-400">(${raw.luk}役)</span></div>
+      `
         },
-        legend: {
-            bottom: '0',
-            textStyle: { color: '#9ca3af' }
+        radar: {
+            indicator: [
+                { name: '攻 ATK\n(打點)', max: 100 },
+                { name: '速 SPD\n(巡數)', max: 100 },
+                { name: '防 DEF\n(守備)', max: 100 },
+                { name: '運 LUK\n(番運)', max: 100 }
+            ],
+            radius: '65%',
+            splitNumber: 4,
+            axisName: { color: '#9ca3af', fontSize: 11, fontWeight: 'bold' },
+            splitLine: { lineStyle: { color: 'rgba(156, 163, 175, 0.2)' } },
+            axisLine: { lineStyle: { color: 'rgba(156, 163, 175, 0.2)' } }
         },
+        series: [{
+            type: 'radar',
+            data: [{
+                value: scores,
+                name: '選手風格',
+                itemStyle: { color: '#10b981' },
+                areaStyle: { color: 'rgba(16, 185, 129, 0.25)' },
+                lineStyle: { width: 2, color: '#10b981' },
+                symbolSize: 6
+            }]
+        }]
+    }
+})
+
+// 7. 和牌形態餅圖配置
+const winStyleOption = computed(() => {
+    const ws = statsData.value?.winStyles || { riichi: 0, dama: 0, fulo: 0 }
+    const total = ws.riichi + ws.dama + ws.fulo
+    return {
+        tooltip: { trigger: 'item', formatter: '{b}: {c}次 ({d}%)' },
+        legend: { bottom: '0', textStyle: { color: '#9ca3af' } },
         series: [{
             type: 'pie',
             radius: ['40%', '70%'],
             avoidLabelOverlap: false,
-            itemStyle: {
-                borderRadius: 6,
-                borderColor: '#1f2937',
-                borderWidth: 2
-            },
+            itemStyle: { borderRadius: 6, borderColor: '#1f2937', borderWidth: 2 },
             label: { show: false },
             data: total > 0 ? [
-                { value: winStyleCounts.value.riichi, name: '立直和牌 (Riichi)', itemStyle: { color: '#ef4444' } },
-                { value: winStyleCounts.value.dama, name: '默聽和牌 (Dama)', itemStyle: { color: '#3b82f6' } },
-                { value: winStyleCounts.value.fulo, name: '副露和牌 (Fulo)', itemStyle: { color: '#f59e0b' } }
+                { value: ws.riichi, name: '立直和牌 (Riichi)', itemStyle: { color: '#ef4444' } },
+                { value: ws.dama, name: '默聽和牌 (Dama)', itemStyle: { color: '#3b82f6' } },
+                { value: ws.fulo, name: '副露和牌 (Fulo)', itemStyle: { color: '#f59e0b' } }
             ] : [
                 { value: 1, name: '無和牌記錄', itemStyle: { color: '#374151' } }
             ]
@@ -394,10 +408,39 @@ const winStyleOption = computed(() => {
     }
 })
 
-// 5. 手动成就占位数据
+// 8. 靜態成就佔位（保持手動陣列）
 const achievements = ref([
     { title: '役滿盃 冠軍', event: '2023 March Mahjong Event', date: '2023-03-28', icon: '🏆' },
     { title: '年度大師賽 季軍', event: '2024 December Finals', date: '2024-12-15', icon: '🥉' },
     { title: '活動周單日四連勝', event: '2025 Event Week', date: '2025-06-12', icon: '🔥' }
 ])
+
+// 監聽選手切換：立刻將時間維度優雅重置為新選手的「生涯全部」
+watch(selectedPlayerId, () => {
+    // 1. 先將區間無條件拉滿至最寬鬆邊界，防禦請求競態
+    dateRange.start = '2022-01'
+    dateRange.end = '2026-12'
+})
+
+// ★★★ 核心修復點 1：切換選手時，將 dateRange 清空發出重置訊號 ★★★
+watch(selectedPlayerId, () => {
+    dateRange.start = ''
+    dateRange.end = ''
+})
+
+// ★★★ 核心修復點 2：API 資料抵達時，僅在區間為空時才對齊生涯邊界 ★★★
+watch(statsData, (newData) => {
+    if (!newData?.careerBounds) return
+
+    // 1. 無條件更新該選手的真實物理邊界
+    careerBounds.start = newData.careerBounds.start
+    careerBounds.end = newData.careerBounds.end
+
+    // 2. 好品味守衛：只有在 dateRange 尚未初始化（首次載入或剛剛切換了選手）時才同步
+    //    如果使用者剛剛點擊了 '2024'，dateRange.start 絕對非空，這行代碼會冷酷跳過，絕不踩踏使用者意圖！
+    if (!dateRange.start || !dateRange.end) {
+        dateRange.start = newData.careerBounds.start
+        dateRange.end = newData.careerBounds.end
+    }
+}, { immediate: true })
 </script>
