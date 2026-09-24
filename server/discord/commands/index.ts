@@ -23,5 +23,5 @@ export const commandRegistry: Record<string, CommandHandler> = {
   pages: handleDemoPager,
   roll_adv: handleRollAdv,
   mahjong_pair: handleMahjongPair,
-  book_of_answers: handleBookOfAnswers
+  解答之书: handleBookOfAnswers
 }
