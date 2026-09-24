@@ -33,7 +33,7 @@ export async function handleBookOfAnswers(interaction: any, event: H3Event) {
           fields,
           footer: {
             text: '心誠則靈 · 僅供娛樂與決策參考',
-            icon_url: 'https://i.imgur.com/cu2YAkn.png'
+            icon_url: 'https://i.imgur.com/Yo9GBYQ.png'
           },
           timestamp: new Date().toISOString()
         }
