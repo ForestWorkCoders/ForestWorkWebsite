@@ -80,7 +80,7 @@ const discordEmbedPayload = {
 useHead({
   script: [
     {
-      key: 'discord-component-embed',
+      key: 'discord:component-embed',
       id: 'discord:component-embed',
       type: 'application/json',
       innerHTML: JSON.stringify(discordEmbedPayload)

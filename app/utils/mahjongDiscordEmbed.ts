@@ -1,5 +1,4 @@
 // app/utils/mahjongDiscordEmbed.ts
-
 interface TournamentEmbedInput {
   title: string
   description: string

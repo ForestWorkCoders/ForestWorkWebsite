@@ -1,5 +1,6 @@
 <script setup>
 import { buildTournamentDiscordEmbed } from '@/utils/mahjongDiscordEmbed'
+import { toComponentEmbedJson } from 'discord-component-embed';
 
 const route = useRoute()
 
@@ -97,8 +98,8 @@ const embedPayload = computed(() => {
 useHead({
   script: [
     {
-      key: 'discord-component-embed',
-      id: 'discord-component-embed',
+      key: 'discord:component-embed',
+      id: 'discord:component-embed',
       type: 'application/json',
       innerHTML: () => JSON.stringify(embedPayload.value)
     }
