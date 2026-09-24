@@ -1,5 +1,5 @@
 <script setup>
-import { buildMatchDiscordEmbed } from '@/utils/mahjongDiscordEmbed'
+import { buildTournamentDiscordEmbed } from '@/utils/mahjongDiscordEmbed'
 
 const route = useRoute()
 
@@ -79,29 +79,30 @@ useSeoMeta({
 
 // 2. 动态组件树计算
 const embedPayload = computed(() => {
-    const currentTitle = tourney.value?.title || '賽事詳情 · ForestWork'
-    const currentUrl = `https://forestwork.vercel.app/games/mahjongsoul/tournaments/${route.params.id}`
-    const banner = tourney.value?.imageUrl || 'https://i.imgur.com/cu2YAkn.png'
+  const title = tourney.value?.title || '林間小鎮賽事'
+  const formatText = tourney.value?.format === 'event' ? '趣味活動周' : '常規積分賽'
+  const desc = `賽事模式：**${formatText}**\n點擊下方按鈕直接查看即時排行榜、選手戰績與牌譜。`
+  const targetUrl = `https://forestwork.vercel.app/games/mahjongsoul/tournaments/${route.params.id}`
+  const image = tourney.value?.imageUrl || 'https://i.imgur.com/cu2YAkn.png'
 
-    return buildMatchDiscordEmbed({
-        title: currentTitle,
-        description: `賽制：${tourney.value?.format || '常規賽'} · 點擊按鈕查看即時積分榜與對局譜。`,
-        matchUrl: currentUrl,
-        bannerUrl: banner,
-        players: tourney.value?.players || []
-    })
+  return buildTournamentDiscordEmbed({
+    title,
+    description: desc,
+    matchUrl: targetUrl,
+    imageUrl: image
+  })
 })
 
 // 3. 核心：带上相同的 key 实施强力覆盖！
 useHead({
-    script: [
-        {
-            key: 'discord-component-embed', // ★ 核心：与 app.vue 相同，强制覆写根节点！
-            id: 'discord-component-embed',
-            type: 'application/json',
-            innerHTML: () => JSON.stringify(embedPayload.value)
-        }
-    ]
+  script: [
+    {
+      key: 'discord-component-embed',
+      id: 'discord-component-embed',
+      type: 'application/json',
+      innerHTML: () => JSON.stringify(embedPayload.value)
+    }
+  ]
 })
 </script>
 

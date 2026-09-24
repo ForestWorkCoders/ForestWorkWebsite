@@ -1,85 +1,65 @@
 // app/utils/mahjongDiscordEmbed.ts
 
-interface PlayerResult {
-  rank: number
-  name: string
-  score: number
-  pts: number
-}
-
-interface MatchEmbedInput {
+interface TournamentEmbedInput {
   title: string
-  description?: string
+  description: string
   matchUrl: string
-  bannerUrl?: string
-  players?: PlayerResult[]
+  imageUrl?: string
 }
 
-export function buildMatchDiscordEmbed(input: MatchEmbedInput) {
-  const medals = ['🥇', '🥈', '🥉', '4位']
-
-  // 1. 如果有选手结算数据，生成顺位列表；否则展示描述
-  let bodyContent = input.description || '林間小鎮賽事即時戰況與積分榜查閱。'
-
-  if (input.players && input.players.length > 0) {
-    const scoreboardText = [...input.players]
-      .sort((a, b) => a.rank - b.rank)
-      .map((p, idx) => {
-        const medal = medals[idx] || `${p.rank}位`
-        const ptsSign = p.pts > 0 ? `+${p.pts}` : `${p.pts}`
-        return `${medal} **${p.name}** ⎯ \`${p.score}點\` (${ptsSign})`
-      })
-      .join('\n')
-
-    bodyContent = `**【對局最終結算】**\n${scoreboardText}`
-  }
-
-  const contentMarkdown = `# ${input.title}\n\n${bodyContent}`
-
-  // 2. 组装规范组件树
+export function buildTournamentDiscordEmbed(input: TournamentEmbedInput) {
   return {
     component: {
-      type: 17,
-      accent_color: 5011302, // #4C7766 林间墨绿
+      type: 17, // 主容器 Container
+      accent_color: 5011302, // #4C7766 (林间墨绿)
       spoiler: false,
       components: [
         {
-          type: 10,
-          content: contentMarkdown
-        },
-        ...(input.bannerUrl
-          ? [
-              {
-                type: 12,
-                items: [
-                  {
-                    media: { url: input.bannerUrl },
-                    description: 'Banner',
-                    spoiler: false
+          type: 9, // ★ 核心：Section 块必须作为容器的合法子级
+          components: [
+            {
+              type: 10, // Text 必须在 Section 内部
+              content: `# ${input.title}\n${input.description}`
+            }
+          ],
+          // 缩略图必须作为 Section 的 accessory 存在
+          ...(input.imageUrl
+            ? {
+                accessory: {
+                  type: 11,
+                  media: {
+                    url: input.imageUrl
                   }
-                ]
+                }
               }
-            ]
-          : []),
+            : {})
+        },
         {
-          type: 14,
+          type: 14, // Divider
           spacing: 1,
           divider: true
         },
         {
-          type: 1,
+          type: 1, // Action Row
           components: [
             {
               type: 2,
-              style: 5,
-              label: '查看完整數據',
-              emoji: { name: '🀄' },
+              style: 5, // Link Button
+              label: '查看賽事排行榜',
+              emoji: { name: '🏆' },
               url: input.matchUrl
             },
             {
               type: 2,
               style: 5,
-              label: '賽事總覽',
+              label: '日麻主頁',
+              emoji: { name: '🀄' },
+              url: 'https://forestwork.vercel.app/games/mahjongsoul'
+            },
+            {
+              type: 2,
+              style: 5,
+              label: '林間官網',
               emoji: { name: '🌲' },
               url: 'https://forestwork.vercel.app'
             }
