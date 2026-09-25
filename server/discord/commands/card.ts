@@ -74,7 +74,7 @@ export async function handleCardCommand(interaction: any, event: H3Event) {
 
   const getSubOption = (name: string) => subOptions.find((o: any) => o.name === name)?.value
   const callerId = interaction.member?.user?.id || interaction.user?.id
-  const userDiscordAvatar = interaction.member?.user?.avatar 
+  const userDiscordAvatar = interaction.member?.user?.avatar
     ? `https://cdn.discordapp.com/avatars/${callerId}/${interaction.member.user.avatar}.png`
     : undefined
 
@@ -171,18 +171,45 @@ export async function handleCardCommand(interaction: any, event: H3Event) {
     let imageUrl = getSubOption('url')?.trim()
     const targetName = getSubOption('name')?.trim()
 
-    // A. 若用户上传了附件文件，转存至 Vercel Blob
+    // 情况 A：用户只传了 URL，耗时极短（<100ms），走同步极速通道
+    if (!attachmentId && imageUrl) {
+      let query = supabase.schema('trpg').from('characters').update({ avatar_url: imageUrl }).eq('discord_id', callerId)
+      if (targetName) query = query.eq('name', targetName)
+      else query = query.eq('is_active', true)
+
+      const { data: updated, error: dbError } = await query.select().maybeSingle()
+      if (dbError || !updated) {
+        return { type: 4, data: { content: `❌ 更新角色卡失敗：${dbError?.message || '查無相關角色卡'}`, flags: 64 } }
+      }
+
+      return {
+        type: 4,
+        data: {
+          content: `🎨 已成功為調查員 **${updated.name}** 綁定立繪！`,
+          embeds: [buildCharacterEmbed(updated, imageUrl)]
+        }
+      }
+    }
+
+    // 情况 B：用户上传了图片附件，耗时长，启动 Discord 原生 Deferred 异步通道！
     if (attachmentId) {
       const attachment = interaction.data?.resolved?.attachments?.[attachmentId]
-      if (attachment?.url) {
-        if (attachment.size && attachment.size > 4.5 * 1024 * 1024) {
-          return {
-            type: 4,
-            data: { content: '⚠️ 圖片大小超過 4.5MB 限制，請壓縮後重試！', flags: 64 }
-          }
-        }
+      if (!attachment?.url) {
+        return { type: 4, data: { content: '❌ 無法獲取上傳的圖片檔案！', flags: 64 } }
+      }
 
+      // 边界面向防守：限制 4.5MB
+      if (attachment.size && attachment.size > 4.5 * 1024 * 1024) {
+        return { type: 4, data: { content: '⚠️ 圖片大小超過 4.5MB，請壓縮後重試！', flags: 64 } }
+      }
+
+      const applicationId = interaction.application_id
+      const interactionToken = interaction.token
+
+      // ★★★ 核心好品味：将耗时的网络流转挂入后台，Serverless 不提前冻结！★★★
+      event.waitUntil((async () => {
         try {
+          // 1. 抓取图片并转存到 Vercel Blob
           const blobToken = process.env.BLOB_READ_WRITE_TOKEN
           const res = await fetch(attachment.url)
           if (!res.ok) throw new Error('無法從 Discord 下載圖片檔案')
@@ -198,63 +225,49 @@ export async function handleCardCommand(interaction: any, event: H3Event) {
             token: blobToken
           })
 
-          imageUrl = blob.url
+          const uploadedUrl = blob.url
+
+          // 2. 写入 Supabase
+          let query = supabase.schema('trpg').from('characters').update({ avatar_url: uploadedUrl }).eq('discord_id', callerId)
+          if (targetName) query = query.eq('name', targetName)
+          else query = query.eq('is_active', true)
+
+          const { data: updated, error: dbError } = await query.select().maybeSingle()
+          if (dbError || !updated) throw new Error(dbError?.message || '查無匹配的出戰角色卡')
+
+          // 3. 通过 Discord 原生 Followup Webhook 回写终态卡片（无须 Bot Token！）
+          const followupUrl = `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}/messages/@original`
+          await fetch(followupUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🎨 已成功為調查員 **${updated.name}** 綁定永久立繪！`,
+              embeds: [buildCharacterEmbed(updated, uploadedUrl)]
+            })
+          })
         } catch (err: any) {
-          console.error('[Avatar Upload Pipeline Fatal]:', err)
-          return {
-            type: 4,
-            data: { content: `❌ 圖片轉存至 Vercel Blob 失敗：${err?.message || '內部錯誤'}`, flags: 64 }
-          }
+          console.error('[Async Avatar Pipeline Error]:', err)
+          // 报错时向用户回显失败信息
+          const followupUrl = `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}/messages/@original`
+          await fetch(followupUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `❌ 上傳立繪失敗：${err?.message || '處理逾時或網路錯誤'}`
+            })
+          }).catch(() => { })
         }
+      })())
+
+      // ★★★ 核心好品味：0.05 秒秒回 Type 5，瞬间击碎 3 秒熔断！★★★
+      return {
+        type: 5 // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE (通知 Discord 客户端进入思考中)
       }
     }
 
-    if (!imageUrl) {
-      return {
-        type: 4,
-        data: { content: '⚠️ 請至少拖入一張圖片檔案，或在 url 參數填寫公開圖片網址！', flags: 64 }
-      }
-    }
-
-    // B. 将持久化 URL 写入 Supabase
-    try {
-      let query = supabase.schema('trpg').from('characters').update({ avatar_url: imageUrl }).eq('discord_id', callerId)
-      if (targetName) {
-        query = query.eq('name', targetName)
-      } else {
-        query = query.eq('is_active', true)
-      }
-
-      const { data: updated, error: dbError } = await query.select().maybeSingle()
-
-      if (dbError) {
-        console.error('[Supabase Avatar Update Error]:', dbError)
-        return {
-          type: 4,
-          data: { content: `❌ 資料庫寫入失敗：\`${dbError.message}\` (請確認已在 Supabase 執行加列 SQL)`, flags: 64 }
-        }
-      }
-
-      if (!updated) {
-        return {
-          type: 4,
-          data: { content: '⚠️ 找不到匹配的進行中角色卡！請先使用 `/card create` 建立角色，或指定正確的角色姓名。', flags: 64 }
-        }
-      }
-
-      return {
-        type: 4,
-        data: {
-          content: `🎨 已成功為調查員 **${updated.name}** 綁定永久立繪！`,
-          embeds: [buildCharacterEmbed(updated, imageUrl)]
-        }
-      }
-    } catch (err: any) {
-      console.error('[Avatar DB Operation Crash]:', err)
-      return {
-        type: 4,
-        data: { content: `💥 寫入資料庫時遭遇異常：${err?.message || '未知錯誤'}`, flags: 64 }
-      }
+    return {
+      type: 4,
+      data: { content: '⚠️ 請至少拖入一張圖片檔案，或在 url 參數填寫圖片網址！', flags: 64 }
     }
   }
 
@@ -388,7 +401,7 @@ export async function handleCardCommand(interaction: any, event: H3Event) {
 // 4. 处理 Modal 提交 (MODAL_SUBMIT)
 export async function handleCardCreateModal(interaction: any, event: H3Event) {
   const callerId = interaction.member?.user?.id || interaction.user?.id
-  const userDiscordAvatar = interaction.member?.user?.avatar 
+  const userDiscordAvatar = interaction.member?.user?.avatar
     ? `https://cdn.discordapp.com/avatars/${callerId}/${interaction.member.user.avatar}.png`
     : undefined
 
