@@ -319,6 +319,18 @@ export async function handleCardCommand(interaction: any, event: H3Event) {
         }
 
         try {
+          const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+          if (!blobToken) {
+            console.error('[Vercel Blob Fatal]: BLOB_READ_WRITE_TOKEN is not defined in environment variables!')
+            return {
+              type: 4,
+              data: {
+                content: '❌ 系統錯誤：服務端未配置 Vercel Blob 存取憑證，請檢查專案 Storage 關聯狀態！',
+                flags: 64
+              }
+            }
+          }
+          
           // A. 從 Discord 臨時 CDN 抓取二進位資料
           const res = await fetch(attachment.url)
           if (!res.ok) throw new Error('無法從 Discord 下載圖片檔案')
