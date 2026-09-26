@@ -41,8 +41,16 @@ export interface RoundResolution {
   p1ExactHits: number
   p2ExactHits: number
   damageMultiplier: number
-  p1RawError: number
-  p2RawError: number
+  matrixText: string // ★ 核心升級：產出緊湊對戰矩陣
+}
+
+const ANSI = {
+  RESET: '\u001b[0m',
+  RED: '\u001b[31m',          // 劣勢失誤 / 扣血 (紅色)
+  GREEN: '\u001b[32m',        // 優勢領先 / 贏下該位 (綠色)
+  GOLD: '\u001b[1;33m',       // ★ 核心升級：精準命中系統數字！耀眼亮金色 (Bold Gold/Yellow)
+  WHITE: '\u001b[37m',        // 平局 / 系統數列基準 (中性白)
+  GRAY: '\u001b[30m'          // 邊框次要文字
 }
 
 export function calculateGeoguessrDamage(
@@ -51,8 +59,8 @@ export function calculateGeoguessrDamage(
   sysSeq: string,
   round: number
 ): RoundResolution {
-  let p1RawError = 0
-  let p2RawError = 0
+  let p1RawDamage = 0
+  let p2RawDamage = 0
   let p1Heal = 0
   let p2Heal = 0
   let p1ExactHits = 0
@@ -60,7 +68,11 @@ export function calculateGeoguessrDamage(
 
   const damageMultiplier = round <= 2 ? 1.0 : 1.0 + (round - 2) * 0.5
 
-  // 1. 逐位統計雙方的累計失分與精準回血
+  const p1DigitsColored: string[] = []
+  const p2DigitsColored: string[] = []
+  const sysDigitsColored: string[] = []
+  const judgeSymbols: string[] = []
+
   for (let i = 0; i < 10; i++) {
     const sysDigit = parseInt(sysSeq[i]!, 10)
     const p1Digit = parseInt(p1Seq[i]!, 10)
@@ -69,33 +81,43 @@ export function calculateGeoguessrDamage(
     const err1 = Math.abs(p1Digit - sysDigit)
     const err2 = Math.abs(p2Digit - sysDigit)
 
-    // 統計在各個位數上的總失分
-    if (err1 > err2) {
-      p1RawError += (err1 - err2)
-    } else if (err2 > err1) {
-      p2RawError += (err2 - err1)
-    }
+    const isP1Hit = err1 === 0
+    const isP2Hit = err2 === 0
+    if (isP1Hit) { p1Heal += sysDigit; p1ExactHits++; }
+    if (isP2Hit) { p2Heal += sysDigit; p2ExactHits++; }
 
-    // 精準命中回血 (命中系統數字該位值)
-    if (err1 === 0) {
-      p1Heal += sysDigit
-      p1ExactHits++
-    }
-    if (err2 === 0) {
-      p2Heal += sysDigit
-      p2ExactHits++
+    // ★ 系統數字採用中性純白，確保不與命中者的金色搶視覺焦點
+    sysDigitsColored.push(`${ANSI.WHITE}${sysDigit}${ANSI.RESET}`)
+
+    // ★★★ 核心好品味：精準命中者使用耀眼金色 (ANSI.GOLD) 渲染 ★★★
+    if (err1 < err2) {
+      p2RawDamage += (err2 - err1)
+      p1DigitsColored.push(isP1Hit ? `${ANSI.GOLD}${p1Digit}${ANSI.RESET}` : `${ANSI.GREEN}${p1Digit}${ANSI.RESET}`)
+      p2DigitsColored.push(`${ANSI.RED}${p2Digit}${ANSI.RESET}`)
+      judgeSymbols.push(isP1Hit ? '🎯' : '1')
+    } else if (err1 > err2) {
+      p1RawDamage += (err1 - err2)
+      p1DigitsColored.push(`${ANSI.RED}${p1Digit}${ANSI.RESET}`)
+      p2DigitsColored.push(isP2Hit ? `${ANSI.GOLD}${p2Digit}${ANSI.RESET}` : `${ANSI.GREEN}${p2Digit}${ANSI.RESET}`)
+      judgeSymbols.push(isP2Hit ? '🎯' : '2')
+    } else {
+      // 平手時：若猜中依然閃耀金色，否則保持普通白字
+      p1DigitsColored.push(isP1Hit ? `${ANSI.GOLD}${p1Digit}${ANSI.RESET}` : `${ANSI.WHITE}${p1Digit}${ANSI.RESET}`)
+      p2DigitsColored.push(isP2Hit ? `${ANSI.GOLD}${p2Digit}${ANSI.RESET}` : `${ANSI.WHITE}${p2Digit}${ANSI.RESET}`)
+      judgeSymbols.push(isP1Hit && isP2Hit ? '🎯' : '=')
     }
   }
 
-  // 2. ★★★ 核心升級：正統 Geoguessr 回合淨差裁決 (只有總落後者承受差值，贏家 0 傷！) ★★★
-  let p1Damage = 0
-  let p2Damage = 0
+  // 後續組裝矩陣代碼保持不變...
+  const headerRow = `${ANSI.WHITE}位數 0 1 2 3 4 5 6 7 8 9${ANSI.RESET}`
+  const sysRow    = `系統 ${sysDigitsColored.join(' ')}`
+  const p1Row     = `P1  ${p1DigitsColored.join(' ')}`
+  const p2Row     = `P2  ${p2DigitsColored.join(' ')}`
+  const judgeRow  = `判定 ${judgeSymbols.join(' ')}`
 
-  if (p1RawError > p2RawError) {
-    p1Damage = Math.round((p1RawError - p2RawError) * damageMultiplier)
-  } else if (p2RawError > p1RawError) {
-    p2Damage = Math.round((p2RawError - p1RawError) * damageMultiplier)
-  }
+  const matrixText = [headerRow, sysRow, p1Row, p2Row, judgeRow].join('\n')
+  const p1Damage = Math.round(p1RawDamage * damageMultiplier)
+  const p2Damage = Math.round(p2RawDamage * damageMultiplier)
 
   return {
     p1Damage,
@@ -105,8 +127,7 @@ export function calculateGeoguessrDamage(
     p1ExactHits,
     p2ExactHits,
     damageMultiplier,
-    p1RawError,
-    p2RawError
+    matrixText
   }
 }
 
@@ -156,12 +177,12 @@ export function buildLinerBattleEmbed(battle: any) {
   ].join('\n')
 
   return {
-    title: '🎮 LinerBattle 數列對決 (Geoguessr 規則版)',
+    title: '🎮 LinerBattle 數列對決 (2026 重生版)',
     description,
     color: isFinished ? 0xE74C3C : (isWaitingInput ? 0x3498DB : 0xF1C40F),
     footer: {
       text: '位差差額承受傷害 · 精準命中獲取等額回血 · 上限 100 HP',
-      icon_url: 'https://i.imgur.com/cu2YAkn.png'
+    //   icon_url: 'https://i.imgur.com/cu2YAkn.png'
     },
     timestamp: new Date().toISOString()
   }
@@ -240,6 +261,10 @@ export async function handleLinerBattleCommand(interaction: any, event: H3Event)
       return { type: 4, data: { content: '❌ 你不能挑戰你自己！', flags: 64 } }
     }
 
+    const resolvedMember = interaction.data?.resolved?.members?.[targetUserId]
+    const resolvedUser = interaction.data?.resolved?.users?.[targetUserId]
+    const targetName = resolvedMember?.nick || resolvedUser?.global_name || resolvedUser?.username || '挑戰目標'
+
     const supabase = getSupabase()
     const { data: battle, error } = await supabase
       .schema('trpg')
@@ -249,7 +274,7 @@ export async function handleLinerBattleCommand(interaction: any, event: H3Event)
         p1_id: callerId,
         p1_name: callerName,
         p2_id: targetUserId,
-        p2_name: '挑戰目標',
+        p2_name: targetName,
         p1_hp: 100,
         p2_hp: 100,
         status: 'WAITING_ACCEPT'
@@ -466,12 +491,7 @@ export async function handleLinerBattleModal(interaction: any, event: H3Event) {
   const newP1Hp = Math.min(MAX_HP, battle.p1_hp - res.p1Damage + res.p1Heal)
   const newP2Hp = Math.min(MAX_HP, battle.p2_hp - res.p2Damage + res.p2Heal)
   const isGameOver = newP1Hp <= 0 || newP2Hp <= 0
-
-  const multTitle = res.damageMultiplier > 1.0 
-    ? `⚡ **[第 ${battle.round} 回合 · 狂暴倍率 ${res.damageMultiplier}x 生效！]**\n` 
-    : `🛡️ **[第 ${battle.round} 回合 · 基礎 1.0x 傷害]**\n`
-    
-
+ 
   const updatePayload: any = {
     p1_seq: p1Seq,
     p2_seq: p2Seq,
@@ -499,50 +519,55 @@ export async function handleLinerBattleModal(interaction: any, event: H3Event) {
     return { type: 4, data: { content: `❌ 結算失敗：${updateErr?.message}`, flags: 64 } }
   }
 
-  // 構造回合戰報詳情
-  const p1StatusNote = [
-    res.p1Damage > 0 
-      ? `承受淨差傷害 \`-${res.p1Damage}\` (失分差 ${res.p1RawError} - ${res.p2RawError})` 
-      : '🛡️ **本輪完勝 (免傷 0)**',
-    res.p1Heal > 0 ? `🎯 精準命中 ${res.p1ExactHits} 位 (\`+${res.p1Heal} HP\`)` : ''
+  const multBadge = res.damageMultiplier > 1.0 
+    ? `⚡ **[第 ${battle.round} 回合 · 狂暴倍率 ${res.damageMultiplier}x 生效！]**\n` 
+    : `🛡️ **[第 ${battle.round} 回合 · 基礎 1.0x 傷害]**\n`
+
+  const p1Details = [
+    res.p1Damage > 0 ? `承受差額傷害 \`-${res.p1Damage}\`` : '✨ 本輪無失誤免傷',
+    res.p1Heal > 0 ? `🎯 精準回血 \`+${res.p1Heal} HP\` (${res.p1ExactHits}位)` : ''
   ].filter(Boolean).join(' ｜ ')
 
-  const p2StatusNote = [
-    res.p2Damage > 0 
-      ? `承受淨差傷害 \`-${res.p2Damage}\` (失分差 ${res.p2RawError} - ${res.p1RawError})` 
-      : '🛡️ **本輪完勝 (免傷 0)**',
-    res.p2Heal > 0 ? `🎯 精準命中 ${res.p2ExactHits} 位 (\`+${res.p2Heal} HP\`)` : ''
+  const p2Details = [
+    res.p2Damage > 0 ? `承受差額傷害 \`-${res.p2Damage}\`` : '✨ 本輪無失誤免傷',
+    res.p2Heal > 0 ? `🎯 精準回血 \`+${res.p2Heal} HP\` (${res.p2ExactHits}位)` : ''
   ].filter(Boolean).join(' ｜ ')
 
-  const reportEmbed = {
-    title: '💥 LinerBattle 回合結算戰報',
-    description: [
-      multTitle,
-      `**本輪系統數列**: \`${battle.system_seq}\``,
-      '',
-      `**P1 (${battle.p1_name})**: \`${p1Seq}\``,
-      `結算: ${p1StatusNote}`,
-      `生命: ${renderHealthBar(newP1Hp)}`,
-      '',
-      `**P2 (${battle.p2_name})**: \`${p2Seq}\``,
-      `結算: ${p2StatusNote}`,
-      `生命: ${renderHealthBar(newP2Hp)}`,
-      '',
-      isGameOver
-        ? (newP1Hp <= 0 && newP2Hp <= 0
-            ? '⚖️ **雙方同歸於盡！這是一場壯烈的平局！**'
-            : (newP1Hp <= 0 ? `🏆 **${battle.p2_name} 獲勝！**\n💀 ${battle.p1_name} 已死亡。` : `🏆 **${battle.p1_name} 獲勝！**\n💀 ${battle.p2_name} 已死亡。`))
-        : `🔄 **雙方存活！已進入第 ${finalBattle.round} 回合，請繼續點擊按鈕輸入數列！**`
-    ].join('\n'),
-    color: isGameOver ? 0xE74C3C : 0x2ECC71,
-    footer: { text: `LB=${battle.id} · Geoguessr 差額結算完畢` }
-  }
+  const reportDescription = [
+    multBadge,
+    '**📊 本輪 10 位數列交鋒矩陣**:',
+    '```ansi', // ★ 關鍵：宣告為 ansi 著色區塊
+    res.matrixText,
+    '```',
+    '> *圖例: 🟢/🎯 贏下該位 ｜ 🔴 劣勢挨打 ｜ ⚪ 平手免傷*',
+    '',
+    `**P1 (${battle.p1_name})**`,
+    `結算: ${p1Details}`,
+    `生命: ${renderHealthBar(newP1Hp)}`,
+    '',
+    `**P2 (${battle.p2_name})**`,
+    `結算: ${p2Details}`,
+    `生命: ${renderHealthBar(newP2Hp)}`,
+    '',
+    isGameOver
+      ? (newP1Hp <= 0 && newP2Hp <= 0
+          ? '⚖️ **雙方同歸於盡！這是一場壯烈的平局！**'
+          : (newP1Hp <= 0 
+              ? `🏆 **${battle.p2_name} 獲勝！**\n💀 ${battle.p1_name} 生命耗盡陣亡。` 
+              : `🏆 **${battle.p1_name} 獲勝！**\n💀 ${battle.p2_name} 生命耗盡陣亡。`))
+      : `🔄 **雙方存活！已進入第 ${finalBattle.round} 回合，請繼續點擊按鈕輸入數列！**`
+  ].join('\n')
 
   return {
     type: 4,
     data: {
-      content: `💥 雙方數列提交完畢，已在頻道公屏完成結算！`,
-      embeds: [reportEmbed],
+      content: `💥 雙方數列提交完畢，第 ${battle.round} 回合交鋒結算完畢！`,
+      embeds: [{
+        title: '💥 LinerBattle 回合結算戰報',
+        description: reportDescription,
+        color: isGameOver ? 0xE74C3C : 0x2ECC71,
+        footer: { text: `LB=${battle.id} · 逐位差額拼刀模式` }
+      }],
       components: buildLinerBattleComponents(finalBattle)
     }
   }
