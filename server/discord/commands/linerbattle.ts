@@ -40,7 +40,9 @@ export interface RoundResolution {
   p2Heal: number
   p1ExactHits: number
   p2ExactHits: number
-  damageMultiplier: number // 暴露實時倍率供卡片展示
+  damageMultiplier: number
+  p1RawError: number
+  p2RawError: number
 }
 
 export function calculateGeoguessrDamage(
@@ -49,16 +51,16 @@ export function calculateGeoguessrDamage(
   sysSeq: string,
   round: number
 ): RoundResolution {
-  let p1Damage = 0
-  let p2Damage = 0
+  let p1RawError = 0
+  let p2RawError = 0
   let p1Heal = 0
   let p2Heal = 0
   let p1ExactHits = 0
   let p2ExactHits = 0
 
-  // ★ 好品味核心公式：前 2 回合 1.0x，自第 3 回合起每回合遞增 0.5x
   const damageMultiplier = round <= 2 ? 1.0 : 1.0 + (round - 2) * 0.5
 
+  // 1. 逐位統計雙方的累計失分與精準回血
   for (let i = 0; i < 10; i++) {
     const sysDigit = parseInt(sysSeq[i]!, 10)
     const p1Digit = parseInt(p1Seq[i]!, 10)
@@ -67,14 +69,14 @@ export function calculateGeoguessrDamage(
     const err1 = Math.abs(p1Digit - sysDigit)
     const err2 = Math.abs(p2Digit - sysDigit)
 
-    // 差額乘以動態狂暴倍率 (四捨五入取整)
+    // 統計在各個位數上的總失分
     if (err1 > err2) {
-      p1Damage += Math.round((err1 - err2) * damageMultiplier)
+      p1RawError += (err1 - err2)
     } else if (err2 > err1) {
-      p2Damage += Math.round((err2 - err1) * damageMultiplier)
+      p2RawError += (err2 - err1)
     }
 
-    // 精準命中回血 (回血保持原值，不乘倍率，避免數值膨脹)
+    // 精準命中回血 (命中系統數字該位值)
     if (err1 === 0) {
       p1Heal += sysDigit
       p1ExactHits++
@@ -85,7 +87,27 @@ export function calculateGeoguessrDamage(
     }
   }
 
-  return { p1Damage, p2Damage, p1Heal, p2Heal, p1ExactHits, p2ExactHits, damageMultiplier }
+  // 2. ★★★ 核心升級：正統 Geoguessr 回合淨差裁決 (只有總落後者承受差值，贏家 0 傷！) ★★★
+  let p1Damage = 0
+  let p2Damage = 0
+
+  if (p1RawError > p2RawError) {
+    p1Damage = Math.round((p1RawError - p2RawError) * damageMultiplier)
+  } else if (p2RawError > p1RawError) {
+    p2Damage = Math.round((p2RawError - p1RawError) * damageMultiplier)
+  }
+
+  return {
+    p1Damage,
+    p2Damage,
+    p1Heal,
+    p2Heal,
+    p1ExactHits,
+    p2ExactHits,
+    damageMultiplier,
+    p1RawError,
+    p2RawError
+  }
 }
 
 // -------------------------------------------------------------
@@ -197,7 +219,6 @@ export async function handleLinerBattleCommand(interaction: any, event: H3Event)
             '**【核心結算機制】**',
             '• **Geoguessr 差額傷害**：針對數列每一位（0~9），系統比對雙方與系統數字的誤差。只有**誤差較大的一方**會承受**雙方誤差之差值**的傷害！若誤差相同，則雙方均不受傷。',
             '• **精準命中回血**：若在某一特定位置完全猜中系統數字（誤差為 0），閣下將**立即回復該數字等量之生命值**（例如猜中 9 回復 9 HP，生命上限 100）！',
-            '• **超載死鬥**：若大戰至第 4 回合仍未分勝負，將開啟超載狀態，所有位差傷害 **1.5 倍暴擊**！',
             '• **動態狂暴倍率**：戰局拖延越久越危險！前 2 回合為 `1.0x` 基礎傷害；自第 3 回合起每回合提升 `+0.5x`（第 3 回合 `1.5x`、第 4 回合 `2.0x`、第 5 回合 `2.5x`...），差額傷害將呈指數級暴增！',
             '',
             '**【隱私與操作】**',
@@ -449,6 +470,7 @@ export async function handleLinerBattleModal(interaction: any, event: H3Event) {
   const multTitle = res.damageMultiplier > 1.0 
     ? `⚡ **[第 ${battle.round} 回合 · 狂暴倍率 ${res.damageMultiplier}x 生效！]**\n` 
     : `🛡️ **[第 ${battle.round} 回合 · 基礎 1.0x 傷害]**\n`
+    
 
   const updatePayload: any = {
     p1_seq: p1Seq,
@@ -479,12 +501,16 @@ export async function handleLinerBattleModal(interaction: any, event: H3Event) {
 
   // 構造回合戰報詳情
   const p1StatusNote = [
-    res.p1Damage > 0 ? `承受差額傷害 \`-${res.p1Damage}\`` : '✨ 完勝對手 (未受傷)',
+    res.p1Damage > 0 
+      ? `承受淨差傷害 \`-${res.p1Damage}\` (失分差 ${res.p1RawError} - ${res.p2RawError})` 
+      : '🛡️ **本輪完勝 (免傷 0)**',
     res.p1Heal > 0 ? `🎯 精準命中 ${res.p1ExactHits} 位 (\`+${res.p1Heal} HP\`)` : ''
   ].filter(Boolean).join(' ｜ ')
 
   const p2StatusNote = [
-    res.p2Damage > 0 ? `承受差額傷害 \`-${res.p2Damage}\`` : '✨ 完勝對手 (未受傷)',
+    res.p2Damage > 0 
+      ? `承受淨差傷害 \`-${res.p2Damage}\` (失分差 ${res.p2RawError} - ${res.p1RawError})` 
+      : '🛡️ **本輪完勝 (免傷 0)**',
     res.p2Heal > 0 ? `🎯 精準命中 ${res.p2ExactHits} 位 (\`+${res.p2Heal} HP\`)` : ''
   ].filter(Boolean).join(' ｜ ')
 
