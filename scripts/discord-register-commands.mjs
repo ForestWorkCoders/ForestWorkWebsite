@@ -514,32 +514,49 @@ const forestCommands = [
         ]
     },
     {
-      name: 'lb',
-      description: 'LinerBattle 經典數列位差對決遊戲',
-      options: [
-        {
-          name: 'challenge',
-          description: '向指定玩家發起 10 位數生死對決',
-          type: 1, // SUB_COMMAND
-          options: [
+        name: 'lb',
+        description: 'LinerBattle 經典數列位差對決遊戲',
+        options: [
             {
-              name: 'target',
-              description: '選擇對決的目標玩家',
-              type: 6, // USER
-              required: true
+                name: 'challenge',
+                description: '向指定玩家發起 10 位數生死對決',
+                type: 1, // SUB_COMMAND
+                options: [
+                    {
+                        name: 'target',
+                        description: '選擇對決的目標玩家',
+                        type: 6, // USER
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: 'help',
+                description: '查看 LinerBattle 遊戲規則與結算機制說明',
+                type: 1 // SUB_COMMAND
             }
-          ]
-        },
-        {
-          name: 'help',
-          description: '查看 LinerBattle 遊戲規則與結算機制說明',
-          type: 1 // SUB_COMMAND
-        }
-      ]
+        ]
     },
     {
-      name: '🥐 送 1 個 Quaso',
-      type: 2
+        name: '🥐 送 1 個 Quaso',
+        type: 2
+    },
+    {
+        name: 'quaso',
+        description: '查看 Quaso (牛角包) 社交人氣與奉獻排行榜',
+        type: 1, // SUB_COMMAND
+        options: [
+            {
+                name: 'mode',
+                description: '排行榜模式 (預設為團寵人氣榜)',
+                type: 3, // STRING
+                required: false,
+                choices: [
+                    { name: '🥐 團寵人氣榜 (收到最多)', value: 'received' },
+                    { name: '✨ 大善人奉獻榜 (送出最多)', value: 'sent' }
+                ]
+            }
+        ]
     }
 ]
 

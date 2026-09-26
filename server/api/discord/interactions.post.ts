@@ -5,6 +5,7 @@ import { handleCardCommand, handleCardCreateModal, handleCardBioModal } from '..
 import { renderCurseLeaderboardPayload } from '../../discord/commands/leaderboard'
 import { handleLinerBattleCommand, handleLinerBattleButton, handleLinerBattleModal } from '../../discord/commands/linerbattle'
 import { handleGiveQuasoContextMenu } from '../../discord/commands/quaso'
+import { renderQuasoLeaderboardPayload } from '../../discord/commands/leaderboard'
 
 export default defineEventHandler(async (event) => {
   const signature = getHeader(event, 'x-signature-ed25519')
@@ -128,6 +129,13 @@ export default defineEventHandler(async (event) => {
         type: 7,
         data: payload
       }
+    }
+
+    if (customId === 'leaderboard_quaso_switch') {
+      const selectedMode = (message.data?.values?.[0] || 'received') as 'received' | 'sent'
+      const clickerId = String(message.member?.user?.id || message.user?.id || '')
+      const payload = await renderQuasoLeaderboardPayload(selectedMode, clickerId)
+      return { type: 7, data: payload }
     }
 
     return {
