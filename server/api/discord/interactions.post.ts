@@ -6,6 +6,7 @@ import { renderCurseLeaderboardPayload } from '../../discord/commands/leaderboar
 import { handleLinerBattleCommand, handleLinerBattleButton, handleLinerBattleModal } from '../../discord/commands/linerbattle'
 import { handleGiveQuasoContextMenu } from '../../discord/commands/quaso'
 import { renderQuasoLeaderboardPayload } from '../../discord/commands/leaderboard'
+import { handleRoomCommand } from '../../discord/commands/room'
 
 export default defineEventHandler(async (event) => {
   const signature = getHeader(event, 'x-signature-ed25519')
@@ -61,6 +62,12 @@ export default defineEventHandler(async (event) => {
 
         if (commandName === 'lb') {
           const responsePayload = await handleLinerBattleCommand(message, event)
+          console.log(`[Discord Card Response Delivered]: Type -> ${responsePayload?.type}`)
+          return responsePayload
+        }
+
+        if (commandName === 'room') {
+          const responsePayload = await handleRoomCommand(message)
           console.log(`[Discord Card Response Delivered]: Type -> ${responsePayload?.type}`)
           return responsePayload
         }
