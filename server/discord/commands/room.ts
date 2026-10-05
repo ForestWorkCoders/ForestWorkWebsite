@@ -1,6 +1,9 @@
 // server/discord/commands/room.ts
 import { getSupabase } from '../../utils/supabase'
 
+// ★★★ 核心門禁：跑團房間管理專屬身分組 ID ★★★
+const REQUIRED_ROOM_ROLE_ID = '919954440709087252'
+
 /**
  * 斯巴達式 Discord REST API 內部調用器
  */
@@ -339,6 +342,19 @@ async function handleArchive(interaction: any, subOptions: any[]) {
 // ★ 全域統一導出入口：handleRoomCommand
 // ============================================================================
 export async function handleRoomCommand(interaction: any) {
+
+    const callerRoles: string[] = interaction.member?.roles || []
+
+    if (!callerRoles.includes(REQUIRED_ROOM_ROLE_ID)) {
+        return {
+            type: 4,
+            data: {
+                content: `🛑 **權限不足**：此跑團房間指令僅限持有專屬身分組 (<@&${REQUIRED_ROOM_ROLE_ID}>) 的 GM 成員執行！`,
+                flags: 64 // 僅點擊者自己看見，公頻零污染
+            }
+        }
+    }
+
     const subCommandObj = interaction.data?.options?.[0]
     const subCommand = subCommandObj?.name
     const subOptions = subCommandObj?.options || []
