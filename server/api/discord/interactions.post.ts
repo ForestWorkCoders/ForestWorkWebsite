@@ -62,13 +62,13 @@ export default defineEventHandler(async (event) => {
 
         if (commandName === 'lb') {
           const responsePayload = await handleLinerBattleCommand(message, event)
-          console.log(`[Discord Card Response Delivered]: Type -> ${responsePayload?.type}`)
+          console.log(`[Discord lb Response Delivered]: Type -> ${responsePayload?.type}`)
           return responsePayload
         }
 
         if (commandName === 'room') {
           const responsePayload = await handleRoomCommand(message)
-          console.log(`[Discord Card Response Delivered]: Type -> ${responsePayload?.type}`)
+          console.log(`[Discord Room Response Delivered]: Type -> ${responsePayload?.type}`)
           return responsePayload
         }
       }
