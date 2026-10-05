@@ -400,21 +400,18 @@ export type Database = {
           account_id: number
           discord_id: number | null
           id: number
-          mr_points: number
           nickname: string
         }
         Insert: {
           account_id: number
           discord_id?: number | null
           id?: number
-          mr_points?: number
           nickname: string
         }
         Update: {
           account_id?: number
           discord_id?: number | null
           id?: number
-          mr_points?: number
           nickname?: string
         }
         Relationships: []
@@ -450,6 +447,27 @@ export type Database = {
             referencedColumns: ["account_id"]
           },
         ]
+      }
+      recent_pairings: {
+        Row: {
+          channel_id: string
+          created_at: string | null
+          id: number
+          triplets: Json
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string | null
+          id?: number
+          triplets: Json
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string | null
+          id?: number
+          triplets?: Json
+        }
+        Relationships: []
       }
       rules: {
         Row: {
@@ -1195,34 +1213,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_quaso_leaderboard: {
-        Args: { p_limit?: number; p_mode: string }
-        Returns: {
-          total: number
-          user_id: string
-          username: string
-        }[]
-      }
-      give_quaso: {
-        Args: {
-          p_amount: number
-          p_giver_id: string
-          p_giver_name: string
-          p_receiver_id: string
-          p_receiver_name: string
-        }
-        Returns: Json
-      }
-      increment_curse_count: {
-        Args: {
-          p_curse_delta: number
-          p_msg_delta: number
-          p_user_id: string
-          p_username: string
-          p_year: number
-        }
-        Returns: undefined
-      }
       update_user_data:
         | {
             Args: {
@@ -1240,6 +1230,204 @@ export type Database = {
             }
             Returns: undefined
           }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  smp: {
+    Tables: {
+      advancements: {
+        Row: {
+          category: string
+          created_at: string
+          description_en: string
+          description_zh_cn: string
+          description_zh_tw: string
+          frame: string
+          icon: string
+          id: string
+          is_hidden: boolean
+          parent_id: string | null
+          title_en: string
+          title_zh_cn: string
+          title_zh_tw: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description_en?: string
+          description_zh_cn?: string
+          description_zh_tw?: string
+          frame?: string
+          icon: string
+          id: string
+          is_hidden?: boolean
+          parent_id?: string | null
+          title_en?: string
+          title_zh_cn?: string
+          title_zh_tw?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_en?: string
+          description_zh_cn?: string
+          description_zh_tw?: string
+          frame?: string
+          icon?: string
+          id?: string
+          is_hidden?: boolean
+          parent_id?: string | null
+          title_en?: string
+          title_zh_cn?: string
+          title_zh_tw?: string
+        }
+        Relationships: []
+      }
+      player_advancements: {
+        Row: {
+          advancement_id: string
+          player_uuid: string
+          season: number
+          unlocked_at: string
+        }
+        Insert: {
+          advancement_id: string
+          player_uuid: string
+          season?: number
+          unlocked_at?: string
+        }
+        Update: {
+          advancement_id?: string
+          player_uuid?: string
+          season?: number
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_advancements_advancement_id_fkey"
+            columns: ["advancement_id"]
+            isOneToOne: false
+            referencedRelation: "advancements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_advancements_season_fkey"
+            columns: ["season"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_bindings: {
+        Row: {
+          bound_at: string
+          discord_id: number
+          player_uuid: string
+        }
+        Insert: {
+          bound_at?: string
+          discord_id: number
+          player_uuid: string
+        }
+        Update: {
+          bound_at?: string
+          discord_id?: number
+          player_uuid?: string
+        }
+        Relationships: []
+      }
+      player_stats: {
+        Row: {
+          deaths: number
+          mined_ancient_debris: number
+          mined_coal: number
+          mined_diamond: number
+          mined_gold: number
+          mined_iron: number
+          mob_kills: number
+          play_time_hours: number
+          player_kills: number
+          player_uuid: string
+          season: number
+          updated_at: string
+          username: string
+          xp_level: number
+        }
+        Insert: {
+          deaths?: number
+          mined_ancient_debris?: number
+          mined_coal?: number
+          mined_diamond?: number
+          mined_gold?: number
+          mined_iron?: number
+          mob_kills?: number
+          play_time_hours?: number
+          player_kills?: number
+          player_uuid: string
+          season?: number
+          updated_at?: string
+          username?: string
+          xp_level?: number
+        }
+        Update: {
+          deaths?: number
+          mined_ancient_debris?: number
+          mined_coal?: number
+          mined_diamond?: number
+          mined_gold?: number
+          mined_iron?: number
+          mob_kills?: number
+          play_time_hours?: number
+          player_kills?: number
+          player_uuid?: string
+          season?: number
+          updated_at?: string
+          username?: string
+          xp_level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_stats_season_fkey"
+            columns: ["season"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          id: number
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id: number
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -1453,6 +1641,26 @@ export type Database = {
           username: string
         }[]
       }
+      give_quaso: {
+        Args: {
+          p_amount: number
+          p_giver_id: string
+          p_giver_name: string
+          p_receiver_id: string
+          p_receiver_name: string
+        }
+        Returns: Json
+      }
+      increment_curse_count: {
+        Args: {
+          p_curse_delta: number
+          p_msg_delta: number
+          p_user_id: string
+          p_username: string
+          p_year: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1613,6 +1821,9 @@ export const Constants = {
     },
   },
   public: {
+    Enums: {},
+  },
+  smp: {
     Enums: {},
   },
   trpg: {
