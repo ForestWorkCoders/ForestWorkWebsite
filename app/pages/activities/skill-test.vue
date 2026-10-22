@@ -37,58 +37,49 @@ async function initDiscordSdkAsync() {
 
     const discordSdk = new DiscordSDK(clientId)
 
-    // 1. 等待 Discord 客户端环境就绪 (带 2.5s 熔断保护)
+    // 1. 放宽握手超时至 8 秒（避免因 1000ms 跨洋延迟被误杀）
     await Promise.race([
       discordSdk.ready(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('SDK Handshake Timeout')), 2500))
+      new Promise((_, reject) => setTimeout(() => reject(new Error('SDK_TIMEOUT: Discord ready() took > 8s')), 8000))
     ])
 
-    // 2. ★ 核心好品味：发起静默授权，获取当前选手临时 Code
-    let authCode: string | null = null
-    try {
-      // 优先尝试静默授权 (prompt: 'none')，用户完全无感
-      const authResult = await discordSdk.commands.authorize({
-        client_id: clientId,
-        response_type: 'code',
-        state: '',
-        prompt: 'none',
-        scope: ['identify']
-      })
-      authCode = authResult.code
-    } catch {
-      // 若首次使用静默失败，降级拉起客户端就地授权抽屉 (无需跳出 iframe)
-      const consentResult = await discordSdk.commands.authorize({
-        client_id: clientId,
-        response_type: 'code',
-        state: '',
-        prompt: 'none',
-        scope: ['identify']
-      })
-      authCode = consentResult.code
+    // 2. 发起静默授权
+    const { code } = await discordSdk.commands.authorize({
+      client_id: clientId,
+      response_type: 'code',
+      state: '',
+      prompt: 'none',
+      scope: ['identify']
+    })
+
+    if (!code) {
+      throw new Error('AUTH_EMPTY: Discord did not return code')
     }
 
-    // 3. 向后端交换真实凭证
-    if (authCode) {
-      const authRes = await $fetch<{
-        success: boolean
-        user: { id: string; username: string; global_name: string; avatar: string }
-      }>('/api/activities/auth', {
-        method: 'POST',
-        body: { code: authCode }
-      })
+    // 3. 向后端换票
+    const authRes = await $fetch<{
+      success: boolean
+      user: { id: string; username: string; global_name: string; avatar: string }
+    }>('/api/activities/auth', {
+      method: 'POST',
+      body: { code }
+    })
 
-      if (authRes.success && authRes.user) {
-        // ★ 核心达成：将当前操作员 ID 绑定为选手真正的 Discord Snowflake！
-        currentDiscordId.value = authRes.user.id
-        currentOperatorDisplay.value = authRes.user.global_name || authRes.user.username // 👈 记录真实名字
-        fetchLeaderboardAndPbs(currentSlot.value.moduleId ?? 1)
-      }
+    if (authRes.success && authRes.user) {
+      currentDiscordId.value = authRes.user.id
+      currentOperatorDisplay.value = authRes.user.global_name || authRes.user.username
+      console.log(`[Activity Auth] 選手就位: ${currentOperatorDisplay.value} (${authRes.user.id})`)
+      fetchLeaderboardAndPbs(currentSlot.value.moduleId ?? 1)
+    } else {
+      throw new Error('AUTH_FAILED: Invalid server response')
     }
-  } catch (err) {
-    // 本地开发浏览器运行或非 Discord 环境时的健壮降级
-    console.warn('[Activity Auth] 非 Discord 客户端或授权降级，使用沙盒身份:', err)
+  } catch (err: any) {
+    // ★ 核心好品味：把真正的罪魁祸首直接暴露在界面上，消灭一切猜测！
+    const errMsg = err?.data?.statusMessage || err?.message || 'UNKNOWN_ERROR'
+    console.error('[Activity Auth Error]:', err)
+
     currentDiscordId.value = '10001'
-    currentOperatorDisplay.value = 'Sandbox Operator'
+    currentOperatorDisplay.value = `SANDBOX (${errMsg})`
   }
 }
 
