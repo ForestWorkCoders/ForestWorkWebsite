@@ -35,9 +35,20 @@ async function initDiscordSdkAsync() {
       ? rawClientId.trim()
       : '311484597248720907'
 
+    // ★ 现场诊断：记录环境真实指纹
+    const inIframe = window.parent !== window
+    const searchParams = new URLSearchParams(window.location.search)
+    const hasFrameId = searchParams.has('frame_id')
+
+    console.log(`[Activity Telemetry] inIframe: ${inIframe}, hasFrameId: ${hasFrameId}, host: ${window.location.hostname}`)
+
+    if (!inIframe && !window.location.hostname.includes('discordsays.com')) {
+      throw new Error('ENV_STANDALONE: Running in non-Discord browser')
+    }
+
     const discordSdk = new DiscordSDK(clientId)
 
-    // 1. 放宽握手超时至 8 秒（避免因 1000ms 跨洋延迟被误杀）
+    // 1. 等待 Discord 客户端宿主握手
     await Promise.race([
       discordSdk.ready(),
       new Promise((_, reject) => setTimeout(() => reject(new Error('SDK_TIMEOUT: Discord ready() took > 8s')), 8000))
@@ -56,7 +67,7 @@ async function initDiscordSdkAsync() {
       throw new Error('AUTH_EMPTY: Discord did not return code')
     }
 
-    // 3. 向后端换票
+    // 3. 服务端换票与身份绑定
     const authRes = await $fetch<{
       success: boolean
       user: { id: string; username: string; global_name: string; avatar: string }
@@ -74,7 +85,6 @@ async function initDiscordSdkAsync() {
       throw new Error('AUTH_FAILED: Invalid server response')
     }
   } catch (err: any) {
-    // ★ 核心好品味：把真正的罪魁祸首直接暴露在界面上，消灭一切猜测！
     const errMsg = err?.data?.statusMessage || err?.message || 'UNKNOWN_ERROR'
     console.error('[Activity Auth Error]:', err)
 
