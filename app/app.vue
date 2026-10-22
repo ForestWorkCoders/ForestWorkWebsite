@@ -90,23 +90,6 @@ useHead({
     }
   ]
 })
-
-onMounted(() => {
-  if (import.meta.client) {
-    const isDiscordSays = window.location.hostname.includes('discordsays.com')
-    const hasFrameId = window.location.search.includes('frame_id=')
-
-    // 如果处于 Discord 活动沙盒中，且当前路径停留在根路径 '/'
-    if ((isDiscordSays || hasFrameId) && route.path === '/') {
-      // 携带所有通信 Query 参数，通过 Vue Router 执行软跳转！
-      // 重点：Vue Router 跳转不会重新加载页面，初始 Window 终身存活！
-      router.replace({
-        path: '/activities/skill-test',
-        query: route.query
-      })
-    }
-  }
-})
 </script>
 
 <template>
